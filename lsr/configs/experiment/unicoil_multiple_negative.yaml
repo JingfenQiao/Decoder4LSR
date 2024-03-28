@@ -3,7 +3,6 @@ defaults:
   - override /dataset@train_dataset: coil_pretokenized
   - override /loss: multiple_negative_loss 
   - override /model: unicoil
-exp_name: unicoil_multiple_negative 
 data_collator:
   _target_: lsr.datasets.data_collator.PretokenizedGroupCollator
 training_arguments:

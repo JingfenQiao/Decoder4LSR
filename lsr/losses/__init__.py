@@ -69,3 +69,4 @@ from .term_mse_loss import TermMSELoss
 from .cross_entropy_loss import CrossEntropyLoss
 from .negative_likelihood import NegativeLikelihoodLoss
 from .distil_kl_loss import DistilKLLoss
+from .joint_kl_mse_loss import JointKLMSE
