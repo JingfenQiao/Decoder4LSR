@@ -12,3 +12,7 @@ eval "$(conda shell.bash hook)"
 conda activate lsr
 echo "Training deepimpact using original settings"
 python -m lsr.train +experiment=splade_asm_msmarco_distil_flops_0.0_0.5 training_arguments.fp16=True wandb.resume=False
+
+CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=splade_asm_msmarco_distil_flops_0.0_0.5 training_arguments.fp16=True wandb.resume=False \
+> log/lsr_eval.log 2>&1 &
+
