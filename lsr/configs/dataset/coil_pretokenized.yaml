@@ -1,3 +1,0 @@
-_target_: lsr.datasets.GroupedMarcoTrainDataset
-path_to_tsv: data/msmarco/coil/psg-train/*
-train_group_size: 8

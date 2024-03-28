@@ -1,9 +1,0 @@
----
-setup:
-  project: lsr-framework-public
-  entity:
-  mode: online
-watch:
-    log: all
-    log_freq: 100
-resume: False 

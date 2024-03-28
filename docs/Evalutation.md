@@ -1,1 +1,0 @@
-## How to do evaluation with `ir_measures`
