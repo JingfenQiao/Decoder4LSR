@@ -3,11 +3,10 @@ from lsr.utils import functional
 from lsr.utils.functional import FunctionalFactory
 from lsr.utils.pooling import PoolingFactory
 from lsr.utils.sparse_rep import SparseRep
-from transformers import AutoModelForMaskedLM
 import torch
 from torch import nn
-from transformers import PretrainedConfig
-import time
+from transformers import PretrainedConfig,AutoTokenizer, AutoModel,T5ForConditionalGeneration,AutoModelWithLMHead,AutoModelForSeq2SeqLM
+
 
 class EPICTermImportance(nn.Module):
     """
@@ -58,17 +57,16 @@ class EPICDocQuality(nn.Module):
         s = self.sm(self.linear(inputs))
         return s
 
-
-class TransformerMLMConfig(PretrainedConfig):
+class TransformerMLMEncoderDecoderSingleStepsConfig(PretrainedConfig):
     """
-    Configuration for the TransformerMLMSparseEncoder
+    Configuration for the TransformerEncoderDecoderSingleStepsConfig
     """
 
-    model_type = "MLM"
+    model_type = "MLM_EncoderDecoder_SINGLESTEPS"
 
     def __init__(
         self,
-        tf_base_model_name_or_dir: str = "distilbert-base-uncased",
+        tf_base_model_name_or_dir: str = "google/flan-t5-base",
         pool: str = "max",
         activation: str = "relu",
         norm: str = "log1p",
@@ -77,7 +75,7 @@ class TransformerMLMConfig(PretrainedConfig):
         **kwargs,
     ):
         """
-        Construct an instance of TransformerMLMConfig
+        Construct an instance of TransformerConfig
         Paramters
         ---------
         tf_base_model_name_or_dir: str
@@ -101,16 +99,19 @@ class TransformerMLMConfig(PretrainedConfig):
         super().__init__(**kwargs)
 
 
-class TransformerMLMSparseEncoder(SparseEncoder):
+class TransformerMLMSparseEncoderDecoderSingleSteps(SparseEncoder):
     """
-    TransformerMLMSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
+    TransformerSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
     """
 
-    config_class = TransformerMLMConfig
+    config_class = TransformerMLMEncoderDecoderSingleStepsConfig
 
-    def __init__(self, config: TransformerMLMConfig = TransformerMLMConfig()):
+    def __init__(self, config: TransformerMLMEncoderDecoderSingleStepsConfig = TransformerMLMEncoderDecoderSingleStepsConfig()):
         super(SparseEncoder, self).__init__(config)
-        self.model = AutoModelForMaskedLM.from_pretrained(
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(
+            config.tf_base_model_name_or_dir
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(
             config.tf_base_model_name_or_dir
         )
         self.activation = FunctionalFactory.get(config.activation)
@@ -126,26 +127,31 @@ class TransformerMLMSparseEncoder(SparseEncoder):
 
         self.norm = FunctionalFactory.get(config.norm)
 
+
     def forward(self, **kwargs):
-        # print(kwargs)
-        special_tokens_mask = kwargs.pop("special_tokens_mask")
+        if "special_tokens_mask" in kwargs:
+            kwargs.pop("special_tokens_mask")
+            
+        if "decoder_input_ids" not in kwargs:
+            batch_size = kwargs["input_ids"].shape[0]
+            # Initialize decoder input as the start token
+            kwargs["decoder_input_ids"] = torch.tensor([[self.model.config.decoder_start_token_id]] * batch_size)
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+            kwargs["decoder_input_ids"] = kwargs["decoder_input_ids"].to(device)
+
+
         output = self.model(**kwargs, output_hidden_states=True)
-        # get last_hidden_states
-        last_hidden_states = output.hidden_states[-1]
-        term_scores = self.term_importance(last_hidden_states)
-        # get cls_tokens: bs x hidden_dim
-        cls_toks = output.hidden_states[-1][:, 0, :]
-        doc_scores = self.doc_quality(cls_toks)
+        decoder_last_hidden_state = output.decoder_hidden_states[-1]
+        term_scores = self.term_importance(decoder_last_hidden_state)
 
         # remove padding tokens and special tokens
         logits = (
             output.logits
             * kwargs["attention_mask"].unsqueeze(-1)
-            * (1 - special_tokens_mask).unsqueeze(-1)
             * term_scores
         )
         # norm default: log(1+x)
         logits = self.norm(self.activation(logits))
         # (default: max) pooling over sequence tokens
-        lex_weights = self.pool(logits) * doc_scores
+        lex_weights = self.pool(logits) 
         return SparseRep(dense=lex_weights)

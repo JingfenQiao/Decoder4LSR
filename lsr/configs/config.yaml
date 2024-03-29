@@ -2,7 +2,7 @@ defaults:
   - _self_ 
   - model: splade
   - dataset@train_dataset: toy_triplets
-  - loss: triplet_margin
+  - loss: distil_margin_mse
   - wandb: defaults
 query_max_length: 250
 doc_max_length: 250

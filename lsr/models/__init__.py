@@ -137,6 +137,15 @@ class DualSparseEncoder(PreTrainedModel):
                 model_dir_or_name + "/doc_encoder")
             return cls(query_encoder, doc_encoder, config)
 
+from .mlm_en_multi import TransformerMLMEncoderOnlyConfig, TransformerMLMEncoderOnlySparseEncoder
+from .mlm_de_multi import TransformerMLMDecoderMultiStepsConfig, TransformerMLMSparseDecoderMultiSteps
+from .mlm_en_de_single import TransformerMLMEncoderDecoderSingleStepsConfig, TransformerMLMSparseEncoderDecoderSingleSteps
+from .mlm_en_de_multi import TransformerMLMEncoderDecoderMultiStepsConfig, TransformerMLMSparseEncoderDecoderMultiSteps
+
+from .mlp_en_multi import TransformerMLPEncoderOnlyConfig, TransformerMLPEncoderOnlySparseEncoder
+from .mlp_de_multi import TransformerMLPDecoderMultiStepsConfig, TransformerMLPSparseDecoderMultiSteps
+from .mlp_en_de_single import TransformerMLPEncoderDecoderSingleStepsConfig, TransformerMLPSparseEncoderDecoderSingleSteps
+from .mlp_en_de_multi import TransformerMLPEncoderDecoderMultiStepsConfig, TransformerMLPSparseEncoderDecoderMultiSteps
 
 AutoConfig.register("BINARY", BinaryEncoderConfig)
 AutoModel.register(BinaryEncoderConfig, BinaryEncoder)
@@ -146,3 +155,28 @@ AutoConfig.register("MLM", TransformerMLMConfig)
 AutoModel.register(TransformerMLMConfig, TransformerMLMSparseEncoder)
 AutoConfig.register("CLS_MLM", TransformerCLSMLMConfig)
 AutoModel.register(TransformerCLSMLMConfig, TransformerCLSMLPSparseEncoder)
+
+AutoConfig.register("MLM_ENCODER_ONLY", TransformerMLMEncoderOnlyConfig)
+AutoModel.register(TransformerMLMEncoderOnlyConfig, TransformerMLMEncoderOnlySparseEncoder)
+
+AutoConfig.register("MLM_DECODER_MULTISTEPS", TransformerMLMDecoderMultiStepsConfig)
+AutoModel.register(TransformerMLMDecoderMultiStepsConfig, TransformerMLMSparseDecoderMultiSteps)
+
+AutoConfig.register("MLM_EncoderDecoder_SINGLESTEPS", TransformerMLMEncoderDecoderSingleStepsConfig)
+AutoModel.register(TransformerMLMEncoderDecoderSingleStepsConfig, TransformerMLMSparseEncoderDecoderSingleSteps)
+
+AutoConfig.register("MLM_EncoderDecoder_MULTISTEPS", TransformerMLMEncoderDecoderMultiStepsConfig)
+AutoModel.register(TransformerMLMEncoderDecoderMultiStepsConfig, TransformerMLMSparseEncoderDecoderMultiSteps)
+
+
+AutoConfig.register("MLP_ENCODER_ONLY", TransformerMLPEncoderOnlyConfig)
+AutoModel.register(TransformerMLPEncoderOnlyConfig, TransformerMLPEncoderOnlySparseEncoder)
+
+AutoConfig.register("MLP_DECODER_MULTISTEPS", TransformerMLPDecoderMultiStepsConfig)
+AutoModel.register(TransformerMLPDecoderMultiStepsConfig, TransformerMLPSparseDecoderMultiSteps)
+
+AutoConfig.register("MLP_EncoderDecoder_SINGLESTEPS", TransformerMLPEncoderDecoderSingleStepsConfig)
+AutoModel.register(TransformerMLPEncoderDecoderSingleStepsConfig, TransformerMLPSparseEncoderDecoderSingleSteps)
+
+AutoConfig.register("MLP_EncoderDecoder_MULTISTEPS", TransformerMLPEncoderDecoderMultiStepsConfig)
+AutoModel.register(TransformerMLPEncoderDecoderMultiStepsConfig, TransformerMLPSparseEncoderDecoderMultiSteps)

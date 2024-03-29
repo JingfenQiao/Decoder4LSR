@@ -1,0 +1,7 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+  _target_: lsr.models.TransformerMLMEncoderOnlySparseEncoder
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: True
+  lora: False

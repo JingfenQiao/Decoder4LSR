@@ -1,6 +1,6 @@
 ---
 setup:
-  project: lsr-framework-public
+  project: lsr-cikm
   entity:
   mode: online
 watch:

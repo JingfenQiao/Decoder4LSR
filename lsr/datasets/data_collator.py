@@ -1,6 +1,8 @@
 from cProfile import label
 import torch
+import logging
 
+logger = logging.getLogger(__name__)
 
 class SepDataCollator:
     "Tokenize and batch of (query, pos, neg, pos_score, neg_score)"
@@ -53,7 +55,6 @@ class SepDataCollator:
             "labels": torch.tensor(batch_scores) if len(batch_scores) > 0 else None,
         }
 
-
 class DataCollator:
     "Tokenize and batch of (query, pos, neg, pos_score, neg_score)"
 
@@ -72,11 +73,11 @@ class DataCollator:
             if "query_id" in example:
                 batch_query_ids.append(example["query_id"])
             if "query_text" in example:
-                batch_queries.append(example["query_text"])
+                batch_queries.append("Query " + example["query_text"])
             if "doc_id" in example:
                 batch_docs_ids.append(example["doc_id"])
             if "doc_text" in example:
-                batch_docs.append(example["doc_text"])
+                batch_docs.append(["Passage " + doc for doc in example["doc_text"]])
             if "score" in example:
                 batch_scores.append(example["score"])
         if len(batch_queries) > 0:
