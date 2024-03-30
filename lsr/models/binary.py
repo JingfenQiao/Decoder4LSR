@@ -13,7 +13,7 @@ class BinaryEncoderConfig(PretrainedConfig):
     model_type = "BINARY"
 
     def __init__(
-        self, vocab_size: int = 30522, scale=0.3, **kwargs,
+        self, vocab_size: int = 32128, scale=0.3, **kwargs,
     ):
         """
         Construct a configuration for Binary Encoder
@@ -48,11 +48,14 @@ class BinaryEncoder(SparseEncoder):
         self.scale = nn.Parameter(torch.tensor(config.scale))
 
     def forward(self, **kwargs):
+        if "special_tokens_mask" in kwargs:
+            kwargs.pop("special_tokens_mask")
+
         input_ids = kwargs["input_ids"]
         bin_weights = (
             torch.ones_like(input_ids, dtype=torch.float)
             * kwargs["attention_mask"]
-            * (1 - kwargs["special_tokens_mask"])
+            # * (1 - kwargs["special_tokens_mask"])
         ) * self.scale
         size = torch.tensor(
             (input_ids.size(0), self.vocab_size), device=input_ids.device

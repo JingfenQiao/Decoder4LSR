@@ -72,12 +72,12 @@ class EPICDocQuality(nn.Module):
         s = self.sm(self.linear(inputs))
         return s
 
-class TransformerMLMDecoderMultiStepsConfig(PretrainedConfig):
+class TransformerMLMT5DecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLMSparseEncoder
     """
 
-    model_type = "MLM_DECODER_MULTISTEPS"
+    model_type = "MLM_T5_DECODER_MULTISTEPS"
 
     def __init__(
         self,
@@ -114,15 +114,15 @@ class TransformerMLMDecoderMultiStepsConfig(PretrainedConfig):
         super().__init__(**kwargs)
 
 
-class TransformerMLMSparseDecoderMultiSteps(SparseEncoder):
+class TransformerMLMSparseT5DecoderMultiSteps(SparseEncoder):
     """
     TransformerSeq2SeqSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
     """
 
-    config_class = TransformerMLMDecoderMultiStepsConfig
+    config_class = TransformerMLMT5DecoderMultiStepsConfig
 
     def __init__(self, 
-                 config: TransformerMLMDecoderMultiStepsConfig = TransformerMLMDecoderMultiStepsConfig(),
+                 config: TransformerMLMT5DecoderMultiStepsConfig = TransformerMLMT5DecoderMultiStepsConfig(),
                  model=None):
         
         super(SparseEncoder, self).__init__(config)

@@ -1,0 +1,14 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+  _target_: lsr.models.TransformerMLPSparseEncoderDecoderMultiSteps
+  config: 
+    _target_: lsr.models.TransformerMLPEncoderDecoderMultiStepsConfig
+    activation: "relu" 
+    norm: "identity"
+doc_encoder:
+  _target_: lsr.models.TransformerMLMSparseEncoderDecoderMultiSteps
+
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: False
+  lora: False

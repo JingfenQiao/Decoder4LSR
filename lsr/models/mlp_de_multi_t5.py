@@ -23,12 +23,12 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
-class TransformerMLPDecoderMultiStepsConfig(PretrainedConfig):
+class TransformerMLPT5DecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLPSparseEncoder
     """
 
-    model_type = "MLP_DECODER_MULTISTEPS"
+    model_type = "MLP_T5_DECODER_MULTISTEPS"
 
     def __init__(
         self,
@@ -44,15 +44,15 @@ class TransformerMLPDecoderMultiStepsConfig(PretrainedConfig):
         self.scale = scale
         super().__init__(**kwargs)
 
-class TransformerMLPSparseDecoderMultiSteps(SparseEncoder):
+class TransformerMLPSparseT5DecoderMultiSteps(SparseEncoder):
     """
     TransformerSeq2SeqSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
     """
 
-    config_class = TransformerMLPDecoderMultiStepsConfig
+    config_class = TransformerMLPT5DecoderMultiStepsConfig
 
     def __init__(self, 
-                 config: TransformerMLPDecoderMultiStepsConfig = TransformerMLPDecoderMultiStepsConfig()):        
+                 config: TransformerMLPT5DecoderMultiStepsConfig = TransformerMLPT5DecoderMultiStepsConfig()):        
         super().__init__(config)
         self.model = self.build_model(config.tf_base_model_name_or_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(

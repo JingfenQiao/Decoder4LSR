@@ -2,18 +2,14 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_t5_decoder_only_mlm
+  - override /model: asm_qmlp_dmlm_encoder_decoder
 
-exp_name: mlm_decoder_only_t5_base_0.01
+exp_name: asm_qmlp_dmlm_encoder_decoder
 
 loss:
-  q_regularizer: 
-    _target_: lsr.losses.regularizer.FLOPs
-    weight: 0.01
-    T: 50000
   d_regularizer:
     _target_: lsr.losses.regularizer.FLOPs
-    weight: 0.01
+    weight: 0.08
     T: 50000
  
 training_arguments:

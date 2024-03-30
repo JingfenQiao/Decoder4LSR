@@ -1,6 +1,6 @@
 _target_: lsr.models.DualSparseEncoder
 query_encoder:
-  _target_: lsr.models.TransformerMLMSparseDecoderMultiSteps
+  _target_: lsr.models.TransformerMLMSparseT5DecoderMultiSteps
 config:
   _target_: lsr.models.DualSparseConfig
   shared: True
