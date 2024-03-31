@@ -5,24 +5,12 @@ from lsr.utils.pooling import PoolingFactory
 from lsr.utils.sparse_rep import SparseRep
 import torch
 from torch import nn
-from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM
+from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM, AutoModelForCausalLM
 import torch
 from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
+import logging 
 
-def print_trainable_parameters(model):
-    """
-    Prints the number of trainable parameters in the model.
-    """
-    trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
-        all_param += param.numel()
-        if param.requires_grad:
-            trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
-
+logger = logging.getLogger(__name__)
 class TransformerMLPOPTDecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLPSparseEncoder
@@ -32,7 +20,7 @@ class TransformerMLPOPTDecoderMultiStepsConfig(PretrainedConfig):
 
     def __init__(
         self,
-        tf_base_model_name_or_dir: str = "google/flan-t5-base",
+        tf_base_model_name_or_dir: str = "",
         activation: str = "relu",
         norm: str = "log1p",
         scale=1.0,
@@ -54,11 +42,9 @@ class TransformerMLPSparseOPTDecoderMultiSteps(SparseEncoder):
     def __init__(self, 
                  config: TransformerMLPOPTDecoderMultiStepsConfig = TransformerMLPOPTDecoderMultiStepsConfig()):        
         super().__init__(config)
-        self.model = self.build_model(config.tf_base_model_name_or_dir)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            config.tf_base_model_name_or_dir
-        )
-        self.linear = nn.Linear(self.model.config.hidden_size, 1)
+        self.model = AutoModelForCausalLM.from_pretrained(config.tf_base_model_name_or_dir)
+        # self.linear = nn.Linear(self.model.config.hidden_size, 1)
+        self.linear = nn.Linear(512, 1)
         self.activation = FunctionalFactory.get(config.activation)
         self.norm = FunctionalFactory.get(config.norm)
         self.scale = nn.Parameter(torch.tensor(config.scale))
@@ -66,8 +52,9 @@ class TransformerMLPSparseOPTDecoderMultiSteps(SparseEncoder):
     def forward(self, to_scale=False, **kwargs):
         special_tokens_mask = kwargs.pop("special_tokens_mask")
         output = self.model(**kwargs,output_hidden_states=True)
-        decoder_last_hidden_state = output.hidden_states[-1]
+        decoder_last_hidden_state = output.hidden_states[-1] #(batch_size, sequence_length, hidden_size)     
         tok_weights = self.linear(decoder_last_hidden_state).squeeze(-1)  # bs x len x 1
+
         tok_weights = (
             self.norm(self.activation(tok_weights))
             * kwargs["attention_mask"]
@@ -80,8 +67,3 @@ class TransformerMLPSparseOPTDecoderMultiSteps(SparseEncoder):
             device=tok_weights.device,
         )
         return SparseRep(indices=kwargs["input_ids"], values=tok_weights, size=size)
-
-
-    def build_model(self, model_name_or_dir):
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_dir)
-        return model

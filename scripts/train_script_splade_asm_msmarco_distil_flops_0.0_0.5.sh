@@ -30,5 +30,11 @@ CUDA_VISIBLE_DEVICES=0 nohup python -m lsr.train +experiment=qbin_dmlm_encoder_d
 # t5_base mlm&mlp
 CUDA_VISIBLE_DEVICES=0 nohup python -m lsr.train +experiment=qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0 training_arguments.fp16=True > log/qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0.log 2>&1 &
 
-# OPT decoder-only MLP
+# OPT3.5 decoder-only MLP
 CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlp_decoder_only_opt3.5 training_arguments.fp16=True wandb.resume=False > log/mlp_decoder_only_opt3.5.log 2>&1 &
+
+
+# OPT27 decoder-only MLP
+CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_decoder_only_opt27_0.001 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt27_0.001.log 2>&1 &
+
+CUDA_VISIBLE_DEVICES=0,1  nohup python -m lsr.train +experiment=mlm_decoder_only_opt27_0.001 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt27_0.001.log 2>&1 &

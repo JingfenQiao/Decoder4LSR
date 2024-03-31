@@ -5,72 +5,9 @@ from lsr.utils.pooling import PoolingFactory
 from lsr.utils.sparse_rep import SparseRep
 import torch
 from torch import nn
-from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM
+from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM,AutoModelForCausalLM
 import torch
 from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
-
-def print_trainable_parameters(model):
-    """
-    Prints the number of trainable parameters in the model.
-    """
-    trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
-        all_param += param.numel()
-        if param.requires_grad:
-            trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
-
-class EPICTermImportance(nn.Module):
-    """
-    EPICTermImportance class
-    This module is used in EPIC model to estimate the term importance for each input term
-    Paper: https://arxiv.org/abs/2004.14245
-    """
-
-    def __init__(self, dim: int = 768) -> None:
-        """
-        Construct an EPICTermImportance module
-        Parameters
-        ----------
-        dim: int
-            dimension of the input vectors
-        """
-        super().__init__()
-        self.linear = nn.Linear(dim, 1)
-        self.softplus = nn.Softplus()
-
-    def forward(self, inputs):
-        # inputs usually has shape: batch_size x seq_length x vector_size
-        s = torch.log1p(self.softplus(self.linear(inputs)))
-        return s
-
-
-class EPICDocQuality(nn.Module):
-    """
-    EpicDocQuality
-    This module is used in EPIC model to estimate the doc quality's score. The input vector is usually the [CLS]'s embedding.
-    Paper: https://arxiv.org/abs/2004.14245
-    """
-
-    def __init__(self, dim: int = 768) -> None:
-        """
-        Construct an EpicDocquality module
-        Parameters
-        ----------
-        dim: int
-            dimension of the input vector
-        """
-        super().__init__()
-        self.linear = nn.Linear(dim, 1)
-        self.sm = nn.Sigmoid()
-
-    def forward(self, inputs):
-        """forward function"""
-        s = self.sm(self.linear(inputs))
-        return s
 
 class TransformerMLMOPTDecoderMultiStepsConfig(PretrainedConfig):
     """
@@ -81,36 +18,16 @@ class TransformerMLMOPTDecoderMultiStepsConfig(PretrainedConfig):
 
     def __init__(
         self,
-        tf_base_model_name_or_dir: str = "google/flan-t5-base",
+        tf_base_model_name_or_dir: str = "facebook/opt-350m",
         pool: str = "max",
         activation: str = "relu",
         norm: str = "log1p",
-        term_importance: str = "no",
-        doc_quality: str = "no",
         **kwargs,
     ):
-        """
-        Construct an instance of TransformerSeq2SeqConfig
-        Paramters
-        ---------
-        tf_base_model_name_or_dir: str
-            name/path of the pretrained weights (HuggingFace) for initializing the masked language model's backbone
-        pool: str
-            pooling strategy (max, sum)
-        activation: str
-            activation function
-        norm: str
-            weight normalization function
-        term_importance: str
-            module for estimating term importance. "no" for ormitting this component
-        doc_quality: str
-        """
         self.tf_base_model_name_or_dir = tf_base_model_name_or_dir
         self.pool = pool
         self.activation = activation
         self.norm = norm
-        self.term_importance = term_importance
-        self.doc_quality = doc_quality
         super().__init__(**kwargs)
 
 
@@ -126,41 +43,24 @@ class TransformerMLMSparseOPTDecoderMultiSteps(SparseEncoder):
                  model=None):
         
         super(SparseEncoder, self).__init__(config)
-        self.model = self.build_model(config.tf_base_model_name_or_dir)
-    
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            config.tf_base_model_name_or_dir
-        )
+        print("model name ", config.tf_base_model_name_or_dir)
+        self.model = AutoModelForCausalLM.from_pretrained(config.tf_base_model_name_or_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(config.tf_base_model_name_or_dir)
+
         self.activation = FunctionalFactory.get(config.activation)
         self.pool = PoolingFactory.get(config.pool)
-        if config.term_importance == "no":
-            self.term_importance = functional.AllOne()
-        elif config.term_importance == "epic":
-            self.term_importance = EPICTermImportance()
-        if config.doc_quality == "no":
-            self.doc_quality = functional.AllOne()
-        elif config.doc_quality == "epic":
-            self.doc_quality = EPICDocQuality()
 
         self.norm = FunctionalFactory.get(config.norm)
 
     def forward(self, **kwargs):
         special_tokens_mask = kwargs.pop("special_tokens_mask")
         output = self.model(**kwargs,output_hidden_states=True)
-        decoder_last_hidden_state = output.hidden_states[-1]
-        term_scores = self.term_importance(decoder_last_hidden_state)
 
         logits = (
             output.logits
             * kwargs["attention_mask"].unsqueeze(-1)
             * (1 - special_tokens_mask).unsqueeze(-1)
-            * term_scores
         )
         logits = self.norm(self.activation(logits))
         lex_weights = self.pool(logits)
         return SparseRep(dense=lex_weights)
-
-
-    def build_model(self, model_name_or_dir):
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_dir)
-        return model

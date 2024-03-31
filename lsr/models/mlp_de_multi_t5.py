@@ -9,20 +9,6 @@ from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM
 import torch
 from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
 
-def print_trainable_parameters(model):
-    """
-    Prints the number of trainable parameters in the model.
-    """
-    trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
-        all_param += param.numel()
-        if param.requires_grad:
-            trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
-
 class TransformerMLPT5DecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLPSparseEncoder
@@ -54,10 +40,7 @@ class TransformerMLPSparseT5DecoderMultiSteps(SparseEncoder):
     def __init__(self, 
                  config: TransformerMLPT5DecoderMultiStepsConfig = TransformerMLPT5DecoderMultiStepsConfig()):        
         super().__init__(config)
-        self.model = self.build_model(config.tf_base_model_name_or_dir)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            config.tf_base_model_name_or_dir
-        )
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(config.tf_base_model_name_or_dir)
         self.linear = nn.Linear(self.model.config.hidden_size, 1)
         self.activation = FunctionalFactory.get(config.activation)
         self.norm = FunctionalFactory.get(config.norm)
@@ -84,8 +67,3 @@ class TransformerMLPSparseT5DecoderMultiSteps(SparseEncoder):
             device=tok_weights.device,
         )
         return SparseRep(indices=kwargs["input_ids"], values=tok_weights, size=size)
-
-
-    def build_model(self, model_name_or_dir):
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_dir)
-        return model

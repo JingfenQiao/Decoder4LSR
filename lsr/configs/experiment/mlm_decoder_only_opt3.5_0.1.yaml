@@ -2,10 +2,16 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_opt_decoder_only_mlp
+  - override /model: splade_opt_decoder_only_mlm
 
-exp_name: mlp_decoder_only_opt3.5
- 
+exp_name: mlm_decoder_only_opt3.5
+
+loss:
+  d_regularizer:
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.1
+    T: 100000
+
 training_arguments:
   output_dir: ./outputs/${exp_name}
   learning_rate: 1e-6
