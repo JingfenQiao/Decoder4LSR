@@ -1,0 +1,14 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+  _target_: lsr.models.TransformerMLPSparseOPTLoraDecoderMultiSteps
+  config: 
+    _target_: lsr.models.TransformerMLPOPTLoraDecoderMultiStepsConfig
+    tf_base_model_name_or_dir: facebook/opt-6.7b
+    activation: "relu" 
+    norm: "identity"
+
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: True
+  lora: True
+

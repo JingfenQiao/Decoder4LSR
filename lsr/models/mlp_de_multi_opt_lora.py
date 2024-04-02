@@ -11,12 +11,12 @@ from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftMode
 import logging 
 
 logger = logging.getLogger(__name__)
-class TransformerMLPOPTDecoderMultiStepsConfig(PretrainedConfig):
+class TransformerMLPOPTLoraDecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLPSparseEncoder
     """
 
-    model_type = "MLP_OPT_DECODER_MULTISTEPS"
+    model_type = "MLP_OPT_LORA_DECODER_MULTISTEPS"
 
     def __init__(
         self,
@@ -30,17 +30,18 @@ class TransformerMLPOPTDecoderMultiStepsConfig(PretrainedConfig):
         self.activation = activation
         self.norm = norm
         self.scale = scale
+        self.lora_pretrianed = False
         super().__init__(**kwargs)
 
-class TransformerMLPSparseOPTDecoderMultiSteps(SparseEncoder):
+class TransformerMLPSparseOPTLoraDecoderMultiSteps(SparseEncoder):
     """
     TransformerSeq2SeqSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
     """
 
-    config_class = TransformerMLPOPTDecoderMultiStepsConfig
+    config_class = TransformerMLPOPTLoraDecoderMultiStepsConfig
 
     def __init__(self, 
-                 config: TransformerMLPOPTDecoderMultiStepsConfig = TransformerMLPOPTDecoderMultiStepsConfig()):        
+                 config: TransformerMLPOPTLoraDecoderMultiStepsConfig = TransformerMLPOPTLoraDecoderMultiStepsConfig()):        
         super().__init__(config)
         self.model = AutoModelForCausalLM.from_pretrained(config.tf_base_model_name_or_dir)
         self.linear = nn.Linear(self.model.config.hidden_size, 1)

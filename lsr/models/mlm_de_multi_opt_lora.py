@@ -43,6 +43,7 @@ class TransformerMLMOPTLoraDecoderMultiStepsConfig(PretrainedConfig):
         self.pool = pool
         self.activation = activation
         self.norm = norm
+        self.lora_pretrianed = False
         super().__init__(**kwargs)
 
 
