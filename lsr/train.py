@@ -39,7 +39,6 @@ def train(conf: DictConfig):
         conf.training_arguments.run_name = run_name
         conf.index.anserini_output_path = str(anserini_output_dir)
     resolved_conf = OmegaConf.to_container(conf, resolve=True)
-    resolved_conf = OmegaConf.to_container(conf, resolve=True)
     pprint(resolved_conf)
     os.environ["WANDB_PROJECT"] = conf.wandb.setup.project
     wandb.init(

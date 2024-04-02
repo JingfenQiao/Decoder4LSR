@@ -1,8 +1,6 @@
 from cProfile import label
 import torch
-import logging
 
-logger = logging.getLogger(__name__)
 
 class SepDataCollator:
     "Tokenize and batch of (query, pos, neg, pos_score, neg_score)"
@@ -55,6 +53,7 @@ class SepDataCollator:
             "labels": torch.tensor(batch_scores) if len(batch_scores) > 0 else None,
         }
 
+
 class DataCollator:
     "Tokenize and batch of (query, pos, neg, pos_score, neg_score)"
 
@@ -81,36 +80,36 @@ class DataCollator:
             if "score" in example:
                 batch_scores.append(example["score"])
         if len(batch_queries) > 0:
-            tokenized_queries = self.tokenizer(
+            tokenized_queries = dict(self.tokenizer(
                 batch_queries,
                 padding=True,
                 truncation=True,
                 max_length=self.q_max_length,
                 return_tensors="pt",
                 return_special_tokens_mask=True,
-            )
+            ))
         else:
             tokenized_queries = {}
         if len(batch_docs) > 0:
             if isinstance(batch_docs[0], list):
                 doc_groups = list(zip(*batch_docs))
-                tokenized_docs = [self.tokenizer(
+                tokenized_docs = [dict(self.tokenizer(
                     doc_group,
                     padding=True,
                     truncation=True,
                     max_length=self.d_max_length,
                     return_tensors="pt",
                     return_special_tokens_mask=True,
-                ) for doc_group in doc_groups]
+                )) for doc_group in doc_groups]
             else:
-                tokenized_docs = self.tokenizer(
+                tokenized_docs = dict(self.tokenizer(
                     batch_docs,
                     padding=True,
                     truncation=True,
                     max_length=self.d_max_length,
                     return_tensors="pt",
                     return_special_tokens_mask=True,
-                )
+                ))
         else:
             tokenized_docs = {}
         return {

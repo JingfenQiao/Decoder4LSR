@@ -1,0 +1,22 @@
+# @package _global_
+defaults:
+  - override /dataset@train_dataset: msmarco_triplet_distil 
+  - override /loss: distil_margin_mse
+  - override /model: splade_asm
+eval_dataset: 
+  num_documents: 200000
+# trainer: 
+#   eval_dataset: ${eval_dataset}
+loss:
+  q_regularizer:
+    weight: 0
+  d_regularizer:
+    weight: 0.5
+training_arguments:
+  evaluation_strategy: "steps"
+  eval_steps: 5000
+  max_steps: 200000
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 256
+
+# CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_encoder_only_distil_t5_base training_arguments.fp16=True wandb.resume=False > log/lsr_test.log 2>&1 &

@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM
 import torch
-from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
+# from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
 
 def print_trainable_parameters(model):
     """

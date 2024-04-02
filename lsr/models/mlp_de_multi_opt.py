@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM, AutoModelForCausalLM
 import torch
-from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
+# from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
 import logging 
 
 logger = logging.getLogger(__name__)

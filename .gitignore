@@ -131,3 +131,4 @@ data/
 outputs/
 wandb/
 anserini-outputs/
+log/
