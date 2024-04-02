@@ -2,9 +2,9 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_opt27_decoder_only_mlm
+  - override /model: splade_opt27_lora_decoder_only_mlm
 
-exp_name: mlm_decoder_only_opt27_0.001
+exp_name: splade_opt27_lora_decoder_only_mlm.001
 
 loss:
   d_regularizer:
@@ -23,12 +23,12 @@ training_arguments:
   evaluation_strategy: 'no'
   log_level: info 
   logging_steps: 500
-  per_device_train_batch_size: 2
-  max_steps: 600000
+  per_device_train_batch_size: 4
+  max_steps: 160000
   save_total_limit: 3
   num_train_epochs: 2
   save_strategy: "steps"
-  save_steps: 50000
+  save_steps: 20000
   warmup_steps: 6000
   fp16: True
   tf32: True
