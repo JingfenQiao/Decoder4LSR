@@ -1,5 +1,5 @@
 
-CUDA_VISIBLE_DEVICES=0  nohup python -m scripts/try.py
+CUDA_VISIBLE_DEVICES=0,1,2 nohup python scripts/try.py > log/try.log 2>&1 &
 
 
 CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=splade_asm_msmarco_distil_flops_0.0_0.5 training_arguments.fp16=True wandb.resume=False > log/lsr_test.log 2>&1 &

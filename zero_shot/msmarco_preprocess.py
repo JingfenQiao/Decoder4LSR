@@ -102,5 +102,4 @@ if __name__ == "__main__":  # Corrected syntax
     with open(args.top100_passages_path, "w") as outfn:
         for docid in top100_passages:  # Correct variable name
             outfn.write(f"{docid}\t{collections[docid]}\n")
-    
     outfn.close()
