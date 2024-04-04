@@ -7,8 +7,8 @@ defaults:
 exp_name: mlp_decoder_only_t5_base
  
 training_arguments:
-  output_dir: ./outputs/${exp_name}
   _target_: transformers.TrainingArguments
+  output_dir: ./outputs/${exp_name}
   overwrite_output_dir: True 
   remove_unused_columns: False 
   do_train: True

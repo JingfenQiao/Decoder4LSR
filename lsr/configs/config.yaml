@@ -45,6 +45,8 @@ training_arguments:
   seed: 42
 
 inference_arguments:
+  output_dir: ${training_arguments.output_dir}/${inference_arguments.dataset}/${inference_arguments.type}
+  model_path: ${training_arguments.output_dir}/model
   input_path: data/toy-data/train_queries/raw.tsv
   input_format: tsv
   dataset: inference
