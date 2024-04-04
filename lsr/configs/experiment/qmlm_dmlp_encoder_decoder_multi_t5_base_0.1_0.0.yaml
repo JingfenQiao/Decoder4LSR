@@ -4,7 +4,7 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: asm_qmlm_dmlp_encoder_decoder
 
-exp_name: asm_qmlm_dmlp_encoder_decoder
+exp_name: qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
 
 loss:
   q_regularizer:

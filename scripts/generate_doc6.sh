@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -p gpu
-#SBATCH --job-name=mlp_decoder_only_t5_base
+#SBATCH --job-name=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
 #SBATCH --mem=30G
 #SBATCH --time=15:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/mlp_decoder_only_t5_base%a.output
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/mlp_decoder_only_t5_base%a.output
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.output
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.output
 #SBATCH --array=1-5   # We have 5 files
 #SBATCH --gres=gpu
 #SBATCH --exclude=ilps-cn108
@@ -27,4 +27,4 @@ inference_arguments.type=$type \
 inference_arguments.batch_size=$batch_size \
 inference_arguments.scale_factor=100 \
 inference_arguments.top_k=-1 \
-+experiment=mlp_decoder_only_t5_base
++experiment=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
