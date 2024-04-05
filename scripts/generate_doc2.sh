@@ -22,7 +22,7 @@ batch_size=32
 type='doc'
 python -m lsr.inference \
 inference_arguments.input_path=$input_path \
-inference_arguments.output_file=$output_file_name \
+inference_arguments.output_file=$output_file_name.tsv \
 inference_arguments.type=$type \
 inference_arguments.batch_size=$batch_size \
 inference_arguments.scale_factor=100 \
