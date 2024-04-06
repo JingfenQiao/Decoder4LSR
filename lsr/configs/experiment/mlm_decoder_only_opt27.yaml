@@ -2,10 +2,20 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_encoder_decoder_multi_mlp
+  - override /model: splade_t5_decoder_only_mlm
 
-exp_name: mlp_encoder_decoder_multi_t5_base
+exp_name: mlm_decoder_only_t5_base_0.01
 
+loss:
+  q_regularizer: 
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.01
+    T: 50000
+  d_regularizer:
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.01
+    T: 50000
+ 
 training_arguments:
   output_dir: ./outputs/${exp_name}
   _target_: transformers.TrainingArguments
@@ -31,5 +41,5 @@ training_arguments:
   ddp_find_unused_parameters: False
   seed: 42
 tokenizer:
-  tokenizer_name: google/flan-t5-base
-resume_from_checkpoint: True
+  tokenizer_name: facebook/opt-2.7b
+resume_from_checkpoint: False
