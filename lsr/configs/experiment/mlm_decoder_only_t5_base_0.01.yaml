@@ -17,8 +17,8 @@ loss:
     T: 50000
  
 training_arguments:
-  output_dir: ./outputs/${exp_name}
   _target_: transformers.TrainingArguments
+  output_dir: ./outputs/${exp_name}
   overwrite_output_dir: True 
   remove_unused_columns: False 
   do_train: True

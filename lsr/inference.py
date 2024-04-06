@@ -52,12 +52,18 @@ def inference(cfg: DictConfig,):
     tokenizer = Tokenizer.from_pretrained(tokenizer_path)
     ids = []
     texts = []
+    if cfg.type == "query":
+        prompt = "Query: "
+    else:
+        prompt = "Passage: "
+
     if cfg.input_format in ("tsv","json"):
         with open(cfg.input_path, "r") as f:
             if cfg.input_format == "tsv":
                 for line in tqdm(f, desc=f"Reading data from {cfg.input_path}"):
                     try:
                         idx, text = line.strip().split("\t")
+                        text = prompt + text
                         ids.append(idx)
                         texts.append(text)
                     except:
@@ -70,6 +76,7 @@ def inference(cfg: DictConfig,):
                         text = (line["title"] + " " + line["text"]).strip()
                     else:
                         text = line["text"].strip()
+                    text = prompt + text
                     ids.append(idx)
                     texts.append(text)
     else:
@@ -78,6 +85,7 @@ def inference(cfg: DictConfig,):
             for doc in tqdm(dataset.queries_iter(), desc=f"Reading data from ir_datasets {cfg.input_path}"):
                 idx = doc.query_id
                 text = doc.text.strip()
+                text = prompt + text
                 ids.append(idx)
                 texts.append(text)
         else:
@@ -87,6 +95,7 @@ def inference(cfg: DictConfig,):
                     text = (doc.title + " " + doc.text).strip()
                 except:
                     text = (doc.text).strip()
+                text = prompt + text
                 ids.append(idx)
                 texts.append(text)
     assert len(ids) == len(texts)
