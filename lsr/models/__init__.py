@@ -111,11 +111,39 @@ class DualSparseEncoder(PreTrainedModel):
             output = loss(q_reps, *doc_group_reps, labels)
         return output
 
+    # def save_pretrained(self, model_dir):
+    #     """Save both query and document encoder"""
+    #     self.config.save_pretrained(model_dir)
+    #     if self.config.shared:
+    #         self.encoder.save_pretrained(model_dir + "/shared_encoder")
+    #     else:
+    #         self.query_encoder.save_pretrained(model_dir + "/query_encoder")
+    #         self.doc_encoder.save_pretrained(model_dir + "/doc_encoder")
+
+    # @classmethod
+    # def from_pretrained(cls, model_dir_or_name):
+    #     """Load query and doc encoder from a directory"""
+    #     config = DualSparseConfig.from_pretrained(model_dir_or_name)
+    #     if config.shared:
+    #         shared_encoder = AutoModel.from_pretrained(
+    #             model_dir_or_name + "/shared_encoder"
+    #         )
+    #         return cls(shared_encoder, config=config)
+    #     else:
+    #         query_encoder = AutoModel.from_pretrained(
+    #             model_dir_or_name + "/query_encoder"
+    #         )
+    #         doc_encoder = AutoModel.from_pretrained(
+    #             model_dir_or_name + "/doc_encoder")
+    #         return cls(query_encoder, doc_encoder, config)
+
     def save_pretrained(self, model_dir):
         """Save both query and document encoder"""
         self.config.save_pretrained(model_dir)
         if self.config.shared:
             self.encoder.save_pretrained(model_dir + "/shared_encoder")
+            if self.config.lora:
+                self.encoder.model.save_pretrained(model_dir + "/shared_encoder",save_embedding_layers=True)
         else:
             self.query_encoder.save_pretrained(model_dir + "/query_encoder")
             self.doc_encoder.save_pretrained(model_dir + "/doc_encoder")
@@ -124,17 +152,24 @@ class DualSparseEncoder(PreTrainedModel):
     def from_pretrained(cls, model_dir_or_name):
         """Load query and doc encoder from a directory"""
         config = DualSparseConfig.from_pretrained(model_dir_or_name)
+        # config.lora = False
+        print(config)
         if config.shared:
-            shared_encoder = AutoModel.from_pretrained(
-                model_dir_or_name + "/shared_encoder"
-            )
+            if config.lora:
+                model_config = AutoConfig.from_pretrained(model_dir_or_name + "/shared_encoder")
+                model_config.lora_pretrianed = True
+                shared_encoder = AutoModel.from_config(model_config)
+            else:
+                shared_encoder = AutoModel.from_pretrained(
+                    model_dir_or_name + "/shared_encoder"
+                )
+
             return cls(shared_encoder, config=config)
         else:
             query_encoder = AutoModel.from_pretrained(
                 model_dir_or_name + "/query_encoder"
             )
-            doc_encoder = AutoModel.from_pretrained(
-                model_dir_or_name + "/doc_encoder")
+            doc_encoder = AutoModel.from_pretrained(model_dir_or_name + "/doc_encoder")
             return cls(query_encoder, doc_encoder, config)
 
 from .mlm_en_multi import TransformerMLMEncoderOnlyConfig, TransformerMLMEncoderOnlySparseEncoder

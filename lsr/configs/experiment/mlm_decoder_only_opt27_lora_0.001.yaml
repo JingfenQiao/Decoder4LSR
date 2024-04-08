@@ -4,7 +4,7 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade_opt27_lora_decoder_only_mlm
 
-exp_name: splade_opt27_lora_decoder_only_mlm.001
+exp_name: mlm_decoder_only_opt27_lora_0.001
 
 loss:
   d_regularizer:
