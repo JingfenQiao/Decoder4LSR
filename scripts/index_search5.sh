@@ -1,14 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=mlp_encoder_decoder_multi_t5_base
+#SBATCH --job-name=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
 #SBATCH --mem=30G
 #SBATCH --time=8:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/mlp_encoder_decoder_multi_t5_base%a.out
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/mlp_encoder_decoder_multi_t5_base%a.out
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
 #SBATCH --array=1
 #SBATCH --partition=cpu
 
+
 export HYDRA_FULL_ERROR=1
-MODLE_NAME=mlp_encoder_decoder_multi_t5_base
+MODLE_NAME=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
 ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
 INPUT_DIR=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 OUTPUT_INDEX=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
