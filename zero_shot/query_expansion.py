@@ -107,7 +107,6 @@ def create_sparse_rep(doc_text, client):
     user_text = f"Input Passage: {doc_text}.\n Output json: (at least {min_output} words - include synonyms and semantic relevant words, NOT phrases - weights in range [0,1]): "
     message = client.messages.create(
     model= "claude-3-opus-20240229",
-    # model="claude-3-sonnet-20240229",
     max_tokens=4096,
     temperature=1,
     top_p=1, 
@@ -120,7 +119,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process files.')
     parser.add_argument("--queries_path", type=str)
     parser.add_argument("--collections_path", type=str)
-    parser.add_argument("--passage_output_path", type=str)
     parser.add_argument("--query_output_path", type=str)
     parser.add_argument("--ir_path", type=str, default="irds:msmarco-passage/trec-dl-2019/judged")
     parser.add_argument("--topk", type=int, default=5)
@@ -131,52 +129,21 @@ if __name__ == "__main__":
     sorted_qid2topk = sort_qid2topk(qid2topk, args.topk)
     print(sorted_qid2topk)
 
-    # client = anthropic.Anthropic(
-    #     api_key="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")
+    client = anthropic.Anthropic(
+        api_key="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")
 
-    # with open(args.query_output_path, "w") as outfn:
-    #     for id in tqdm(list(sorted_qid2topk)[0:10], desc=args.query_output_path):
-    #         text = queries[id]
-    #         time.sleep(20)
-    #         # sparse_rep = test_create_sparse_rep(text)
-    #         # output_json ={
-    #         #     "id": id,
-    #         #     "generated_term_weights": sparse_rep,
-    #         #     "num_input_tokens": 20,
-    #         #     "num_output_tokens": 20
-    #         # }
-    #         message = create_sparse_rep(text, client)
-    #         output_json ={
-    #             "id": id,
-    #             "text": text,
-    #             "generated_term_weights": message.content[0].text,
-    #             "num_input_tokens":message.usage.input_tokens,
-    #             "num_output_tokens":message.usage.output_tokens
-    #         }
-    #         outfn.write(json.dumps(output_json) + "\n")
-    # outfn.close()
-
-    with open(args.passage_output_path, "w") as outfn:
-        for id in tqdm(list(sorted_qid2topk)[:10], desc=args.passage_output_path):
-            for docid in sorted_qid2topk[id]:
-                text = collections[docid]
-                time.sleep(20)
-                # sparse_rep = test_create_sparse_rep(text)
-                # output_json ={
-                #     "id": id,
-                #     "generated_term_weights": sparse_rep,
-                #     "num_input_tokens": 20,
-                #     "num_output_tokens": 20
-                # }
-
-                message = create_sparse_rep(text, client)
-                output_json ={
-                    "id": docid,
-                    "text":text,
-                    "generated_term_weights": message.content[0].text,
-                    "num_input_tokens":message.usage.input_tokens,
-                    "num_output_tokens":message.usage.output_tokens
-                }
-                outfn.write(json.dumps(output_json) + "\n")
+    with open(args.query_output_path, "w") as outfn:
+        for id in tqdm(list(sorted_qid2topk), desc=args.query_output_path):
+            text = queries[id]
+            time.sleep(20)
+            message = create_sparse_rep(text, client)
+            output_json ={
+                "id": id,
+                "text": text,
+                "generated_term_weights": message.content[0].text,
+                "num_input_tokens":message.usage.input_tokens,
+                "num_output_tokens":message.usage.output_tokens
+            }
+            outfn.write(json.dumps(output_json) + "\n")
     outfn.close()
     print("Done")
