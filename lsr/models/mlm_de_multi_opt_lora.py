@@ -87,8 +87,8 @@ class TransformerMLMSparseOPTLoraDecoderMultiSteps(SparseEncoder):
     def build_peft_model(self, model_name_or_dir):
         model = AutoModelForCausalLM.from_pretrained(model_name_or_dir,trust_remote_code=True)
         lora_config = LoraConfig(
-            r=64,
-            lora_alpha=64,
+            r=32,
+            lora_alpha=32,
             target_modules =["Wqkv", "out_proj", "fc1", "fc2"],
             lora_dropout=0.1,
             bias="none",
