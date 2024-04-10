@@ -7,7 +7,7 @@ defaults:
 exp_name: mlm_decoder_only_opt13_lora_0.001
 
 loss:
-  q_regularizer: 
+  d_regularizer: 
     _target_: lsr.losses.regularizer.FLOPs
     weight: 0.001
     T: 100000
