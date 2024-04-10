@@ -2,9 +2,9 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_opt27_lora_decoder_only_mlm
+  - override /model: splade_opt13_lora_decoder_only_mlm
 
-exp_name: mlm_decoder_only_opt27_lora_0.001
+exp_name: mlm_decoder_only_opt13_lora_0.001
 
 loss:
   d_regularizer:
@@ -41,5 +41,5 @@ training_arguments:
   optim: adamw_torch
   seed: 42
 tokenizer:
-  tokenizer_name: facebook/opt-2.7b
+  tokenizer_name: facebook/opt-1.3b
 resume_from_checkpoint: False
