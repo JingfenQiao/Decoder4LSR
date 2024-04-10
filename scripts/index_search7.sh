@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
 #SBATCH --mem=30G
-#SBATCH --time=8:00:00
+#SBATCH --time=20:00:00
 #SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
 #SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
 #SBATCH --array=1

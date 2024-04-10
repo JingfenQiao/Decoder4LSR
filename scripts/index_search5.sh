@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
 #SBATCH --mem=30G
-#SBATCH --time=8:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
+#SBATCH --time=20:00:00
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.out
 #SBATCH --array=1
 #SBATCH --partition=cpu
 
