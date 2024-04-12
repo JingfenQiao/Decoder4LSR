@@ -4,16 +4,16 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade_encoder_only_mlm
 
-exp_name: mlm_encoder_only_t5_base_0.01
+exp_name: mlm_encoder_only_t5_base_0.1_0.08
 
 loss:
   q_regularizer: 
     _target_: lsr.losses.regularizer.FLOPs
-    weight: 0.01
+    weight: 0.1
     T: 50000
   d_regularizer:
     _target_: lsr.losses.regularizer.FLOPs
-    weight: 0.01
+    weight: 0.08
     T: 50000
  
 training_arguments:
