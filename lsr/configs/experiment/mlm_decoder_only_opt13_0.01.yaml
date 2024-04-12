@@ -2,18 +2,17 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_opt_decoder_only_mlm
+  - override /model: splade_opt13_decoder_only_mlm
 
-exp_name: mlm_decoder_only_t5_base_0.1
+exp_name: mlm_decoder_only_opt13_lora_0.01
 
 loss:
-  d_regularizer:
+  d_regularizer: 
     _target_: lsr.losses.regularizer.FLOPs
-    weight: 0.1
+    weight: 0.01
     T: 100000
  
 training_arguments:
-  _target_: transformers.TrainingArguments
   output_dir: ./outputs/${exp_name}
   learning_rate: 1e-6
   max_grad_norm: 0.3
@@ -24,7 +23,7 @@ training_arguments:
   evaluation_strategy: 'no'
   log_level: info 
   logging_steps: 500
-  per_device_train_batch_size: 16
+  per_device_train_batch_size: 4
   max_steps: 600000
   save_total_limit: 3
   num_train_epochs: 2
@@ -42,5 +41,5 @@ training_arguments:
   optim: adamw_torch
   seed: 42
 tokenizer:
-  tokenizer_name: facebook/opt-350m
+  tokenizer_name: facebook/opt-1.3b
 resume_from_checkpoint: False

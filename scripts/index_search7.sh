@@ -1,14 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=search_mlp_decoder_only_opt3.5
+#SBATCH --job-name=search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
 #SBATCH --mem=30G
-#SBATCH --time=8:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_mlp_decoder_only_opt3.5%a.out
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_mlp_decoder_only_opt3.5%a.out
+#SBATCH --time=20:00:00
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
 #SBATCH --array=1
 #SBATCH --partition=cpu
 
+
 export HYDRA_FULL_ERROR=1
-MODLE_NAME=mlp_decoder_only_opt3.5
+MODLE_NAME=qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
 ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
 INPUT_DIR=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 OUTPUT_INDEX=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
@@ -31,6 +32,3 @@ $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
 -hits 1000 -impact  -pretokenized  -parallelism 60
 
 ir_measures $ANSERINI_PATH/tools/topics-and-qrels/qrels.msmarco-passage.dev-subset.txt  $OUTPUT_INDEX/msmarco.trec MRR@10 R@1000 NDCG@10
-
-# ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
-# ir_measures $ANSERINI_PATH/tools/topics-and-qrels/qrels.msmarco-passage.dev-subset.txt  msmarco.trec MRR@10 R@1000 NDCG@10

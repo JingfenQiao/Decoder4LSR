@@ -3,14 +3,16 @@
 #SBATCH --job-name=qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08
 #SBATCH --mem=30G
 #SBATCH --time=15:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.output
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08%a.output
-#SBATCH --array=1-5   # We have 5 files
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08_extend%a.output
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/qmlp_dmlm_encoder_decoder_multi_t5_base_0.0_0.08_extend%a.output
+#SBATCH --array=1-2   # We have 5 files
 #SBATCH --gres=gpu
 #SBATCH --exclude=ilps-cn108
 
 export HYDRA_FULL_ERROR=1
-declare -a FILE_LIST=("raw_split_aa"  "raw_split_ab"  "raw_split_ac"  "raw_split_ad"  "raw_split_ae")  # replace with your actual filenames
+# declare -a FILE_LIST=("raw_split_aa"  "raw_split_ab"  "raw_split_ac"  "raw_split_ad"  "raw_split_ae")  # replace with your actual filenames
+
+declare -a FILE_LIST=("raw_split_ad_extend"  "raw_split_ae_extend")
 
 FILE_NAME="${FILE_LIST[$SLURM_ARRAY_TASK_ID - 1]}"
 

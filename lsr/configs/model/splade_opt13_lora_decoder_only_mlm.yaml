@@ -1,0 +1,10 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+    _target_: lsr.models.TransformerMLMSparseOPTLoraDecoderMultiSteps
+    config:
+      _target_: lsr.models.TransformerMLMOPTLoraDecoderMultiStepsConfig
+      tf_base_model_name_or_dir: facebook/opt-1.3b
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: True
+  lora: True

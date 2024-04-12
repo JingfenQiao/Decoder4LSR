@@ -40,6 +40,16 @@ CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlp_decoder_only_o
 
 
 
+# OPT350M decoder-only MLM
+CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_decoder_only_opt3.5_0.1 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt3.5_0.1.log 2>&1 &
+
+
+# OPT1.3B decoder-only MLM
+CUDA_VISIBLE_DEVICES=0,1 nohup python -m lsr.train +experiment=mlm_decoder_only_opt13_lora_0.001 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt13_lora_0.001.log 2>&1 &
+
+
+
+
 # OPT27 decoder-only MLP
 CUDA_VISIBLE_DEVICES=0,1 nohup python -m lsr.train +experiment=mlm_decoder_only_opt27_lora_0.001 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt27_0.001.log 2>&1 &
 
