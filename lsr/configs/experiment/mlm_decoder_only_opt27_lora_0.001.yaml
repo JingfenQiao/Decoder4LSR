@@ -28,7 +28,7 @@ training_arguments:
   save_total_limit: 3
   num_train_epochs: 2
   save_strategy: "steps"
-  save_steps: 20000
+  save_steps: 10000
   warmup_steps: 6000
   fp16: True
   tf32: True
