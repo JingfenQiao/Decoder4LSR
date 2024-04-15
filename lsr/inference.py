@@ -126,6 +126,7 @@ def inference(cfg: DictConfig,):
                 else:
                     batch_output = model.encode_docs(**batch_tkn).to("cpu")
         batch_output = batch_output.float()
+        batch_output = batch_output[:, :50265]
         if cfg.top_k > 0:
             # do top_k selection in batch
             top_k_res = batch_output.topk(dim=1, k=cfg.top_k, sorted=False)

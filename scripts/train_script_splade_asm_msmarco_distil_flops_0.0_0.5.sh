@@ -7,8 +7,9 @@ CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=splade_asm_msmarco
 CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_encoder_only_distil_t5_base training_arguments.fp16=True wandb.resume=False \
 > log/lsr_test.log 2>&1 &
 
+
 # MLM
-CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_encoder_only_t5_base_0.01 training_arguments.fp16=True wandb.resume=False > log/lsr_test.log 2>&1 &
+CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_encoder_only_t5_base_0.1_0.08 training_arguments.fp16=True wandb.resume=False > log/mlm_encoder_only_t5_base_0.1_0.08.log 2>&1 &
 
 CUDA_VISIBLE_DEVICES=0  nohup python -m lsr.train +experiment=mlm_decoder_only_t5_base_0.01 training_arguments.fp16=True wandb.resume=False > log/lsr_test.log 2>&1 &
 
@@ -55,3 +56,7 @@ CUDA_VISIBLE_DEVICES=0,1 nohup python -m lsr.train +experiment=mlm_decoder_only_
 # OPT27 decoder-only MLP
 CUDA_VISIBLE_DEVICES=0,1 nohup python -m lsr.train +experiment=mlm_decoder_only_opt27_lora_0.001 training_arguments.fp16=True wandb.resume=False > log/mlm_decoder_only_opt27_0.001.log 2>&1 &
 
+
+## larger teacher 
+
+CUDA_VISIBLE_DEVICES=0,1,2  nohup python -m lsr.train +experiment=rankllama_mlm_encoder_decoder_multi_t5_base_0.0001 training_arguments.fp16=True wandb.resume=False > log/rankllama_mlm_encoder_decoder_multi_t5_base_0.0001.log 2>&1 &
