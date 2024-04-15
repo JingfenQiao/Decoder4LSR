@@ -5,7 +5,7 @@
 #SBATCH --time=10:00:00
 #SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_decoder_only_opt13_0.001.output
 #SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_decoder_only_opt13_0.001.output
-#SBATCH --gres=gpu:nvidia_titan_xp   # Request one GPU per task
+#SBATCH --gres=gpu:nvidia_rtx_a6000   # Request one GPU per task
 
 export variable HYDRA_FULL_ERROR=1
 input_path=/ivi/ilps/personal/jqiao/lsr_eval/data/msmarco/dev_queries/raw.tsv

@@ -14,14 +14,14 @@ ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
 INPUT_DIR=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 OUTPUT_INDEX=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 
-mkdir -p "$OUTPUT_INDEX" # Create the OUTPUT_DIR if it doesn't exist
-echo "start index "$MODLE_NAME
-$ANSERINI_PATH/target/appassembler/bin/IndexCollection \
--collection JsonSparseVectorCollection \
--input $INPUT_DIR/doc  \
--index $OUTPUT_INDEX/index \
--generator SparseVectorDocumentGenerator \
--threads 60 -impact -pretokenized -storePositions -storeDocvectors -storeRaw
+# mkdir -p "$OUTPUT_INDEX" # Create the OUTPUT_DIR if it doesn't exist
+# echo "start index "$MODLE_NAME
+# $ANSERINI_PATH/target/appassembler/bin/IndexCollection \
+# -collection JsonSparseVectorCollection \
+# -input $INPUT_DIR/doc  \
+# -index $OUTPUT_INDEX/index \
+# -generator SparseVectorDocumentGenerator \
+# -threads 60 -impact -pretokenized -storePositions -storeDocvectors -storeRaw
 
 echo "start search query" $MODLE_NAME
 $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
