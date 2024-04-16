@@ -161,19 +161,20 @@ class TransformerMLMSparseEncoderDecoderMultiStepsMultiSteps(SparseEncoder):
                 kwargs["decoder_input_ids"] = self.model._shift_right(kwargs["input_ids"])
             kwargs["attention_mask"] = self.model._shift_right(kwargs["attention_mask"]).to(kwargs["attention_mask"].device)
 
-        for _ in range(10):
+        for _ in range(5):
             outputs = self.model(**kwargs, output_hidden_states=True)
             logits = (
                 outputs.logits
-                * kwargs["attention_mask"].unsqueeze(-1))
+                * kwargs["attention_mask"].unsqueeze(-1)
+                )
 
             next_token = outputs.logits[:, -1, :].argmax(dim=1).unsqueeze(-1)
             kwargs["decoder_input_ids"] = torch.cat([kwargs["decoder_input_ids"], next_token], dim=-1).to(kwargs["decoder_input_ids"].device)
             kwargs["input_ids"] = torch.cat([kwargs["input_ids"], next_token], dim=-1).to(kwargs["decoder_input_ids"].device)
             kwargs["attention_mask"] = add_decoded_token(kwargs["attention_mask"]).to(kwargs["decoder_input_ids"].device)
-            logits = self.norm(self.activation(logits))
-            lex_weights = self.pool(logits)
 
+        logits = self.norm(self.activation(logits))
+        lex_weights = self.pool(logits)
         return SparseRep(dense=lex_weights)
 
     def build_model(self, model_name_or_dir):
