@@ -43,6 +43,13 @@ def update_attention_mask(decoder_input_ids, generate_output, attention_mask=Non
     
     return attention_mask
 
+def check_subsequence(tensor, sub_tensor):
+    len_st = len(sub_tensor)
+    for start_index in range(len(tensor) - len_st + 1):
+        if torch.equal(tensor[start_index:start_index + len_st], sub_tensor):
+            return True
+    return False
+
 class EPICTermImportance(nn.Module):
     """
     EPICTermImportance class
@@ -167,6 +174,9 @@ class TransformerMLMSparseEncoderDecoderMultiStepsMultiSteps(SparseEncoder):
         if "special_tokens_mask" in kwargs:
             kwargs.pop("special_tokens_mask")
 
+        query = torch.tensor([3424,   545])
+        passage = torch.tensor([3, 27569, 10])
+
         if "decoder_input_ids" not in kwargs:
             if isinstance(self.model, torch.nn.DataParallel):
                 kwargs["decoder_input_ids"] = self.model.module._shift_right(kwargs["input_ids"]).to(kwargs["input_ids"].device)
@@ -174,16 +184,18 @@ class TransformerMLMSparseEncoderDecoderMultiStepsMultiSteps(SparseEncoder):
                 kwargs["decoder_input_ids"] = self.model._shift_right(kwargs["input_ids"])
             kwargs["attention_mask"] = self.model._shift_right(kwargs["attention_mask"]).to(kwargs["attention_mask"].device)
         
-        generation_config = GenerationConfig(
-                num_beams=1,
-                early_stopping=True,
-                do_sample=False,
-                max_new_tokens=3
-            )
-        generate_output = self.model.generate(**kwargs,generation_config=generation_config)
-        kwargs["attention_mask"] = update_attention_mask(kwargs["decoder_input_ids"],generate_output)
-        kwargs["decoder_input_ids"] = torch.cat([kwargs["decoder_input_ids"], generate_output], dim=-1)
-        kwargs["input_ids"] = torch.cat([kwargs["input_ids"], generate_output], dim=-1)
+        if check_subsequence(passage, kwargs["input_ids"]):
+            generation_config = GenerationConfig(
+                    num_beams=1,
+                    early_stopping=True,
+                    do_sample=False,
+                    max_new_tokens=3
+                )
+            generate_output = self.model.generate(**kwargs,generation_config=generation_config)
+            kwargs["attention_mask"] = update_attention_mask(kwargs["decoder_input_ids"],generate_output)
+            kwargs["decoder_input_ids"] = torch.cat([kwargs["decoder_input_ids"], generate_output], dim=-1)
+            kwargs["input_ids"] = torch.cat([kwargs["input_ids"], generate_output], dim=-1)
+        
         outputs = self.model(**kwargs, output_hidden_states=True)
         logits = (
             outputs.logits
@@ -191,6 +203,7 @@ class TransformerMLMSparseEncoderDecoderMultiStepsMultiSteps(SparseEncoder):
             )
         logits = self.norm(self.activation(logits))
         lex_weights = self.pool(logits)
+
         return SparseRep(dense=lex_weights)
 
     def build_model(self, model_name_or_dir):
