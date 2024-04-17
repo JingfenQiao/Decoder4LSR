@@ -119,7 +119,7 @@ def read_ce_score(ce_path: str):
     with gzip.open(ce_path, "rb") as f:
         data = pickle.load(f)
         for qid in tqdm(data, desc=f"Preprocessing data from {ce_path}"):
-            res[str(qid)] = {str(did): data[qid][did] for did in data[qid]}
+            res[str(qid)] = {str(did): float(data[qid][did]) for did in data[qid]}
     return res
 
 
