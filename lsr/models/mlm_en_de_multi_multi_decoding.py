@@ -5,7 +5,7 @@ from lsr.utils.pooling import PoolingFactory
 from lsr.utils.sparse_rep import SparseRep
 import torch
 from torch import nn
-from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM
+from transformers import PretrainedConfig,AutoTokenizer,AutoModelForSeq2SeqLM,GenerationConfig
 import torch
 # from peft import LoraConfig, get_peft_model, TaskType,AdaLoraConfig,AutoPeftModelForSeq2SeqLM,PeftModel
 
@@ -29,6 +29,19 @@ def add_decoded_token(attention_mask):
     output_mask[:, :-1] = attention_mask    
     output_mask[:, -1] = 1
     return output_mask
+
+def update_attention_mask(decoder_input_ids, generate_output, attention_mask=None):
+    decoder_input_ids = torch.cat([decoder_input_ids, generate_output], dim=-1)
+    
+    new_tokens_len = generate_output.size(1)
+    
+    if attention_mask is None:
+        attention_mask = torch.ones((decoder_input_ids.size(0), decoder_input_ids.size(1)), dtype=torch.long, device=decoder_input_ids.device)
+    else:
+        new_mask = torch.ones((attention_mask.size(0), new_tokens_len), dtype=torch.long, device=decoder_input_ids.device)
+        attention_mask = torch.cat([attention_mask, new_mask], dim=-1)
+    
+    return attention_mask
 
 class EPICTermImportance(nn.Module):
     """
@@ -160,19 +173,22 @@ class TransformerMLMSparseEncoderDecoderMultiStepsMultiSteps(SparseEncoder):
             else:
                 kwargs["decoder_input_ids"] = self.model._shift_right(kwargs["input_ids"])
             kwargs["attention_mask"] = self.model._shift_right(kwargs["attention_mask"]).to(kwargs["attention_mask"].device)
-
-        for _ in range(5):
-            outputs = self.model(**kwargs, output_hidden_states=True)
-            logits = (
-                outputs.logits
-                * kwargs["attention_mask"].unsqueeze(-1)
-                )
-
-            next_token = outputs.logits[:, -1, :].argmax(dim=1).unsqueeze(-1)
-            kwargs["decoder_input_ids"] = torch.cat([kwargs["decoder_input_ids"], next_token], dim=-1).to(kwargs["decoder_input_ids"].device)
-            kwargs["input_ids"] = torch.cat([kwargs["input_ids"], next_token], dim=-1).to(kwargs["decoder_input_ids"].device)
-            kwargs["attention_mask"] = add_decoded_token(kwargs["attention_mask"]).to(kwargs["decoder_input_ids"].device)
-
+        
+        generation_config = GenerationConfig(
+                num_beams=1,
+                early_stopping=True,
+                do_sample=False,
+                max_new_tokens=3
+            )
+        generate_output = self.model.generate(**kwargs,generation_config=generation_config)
+        kwargs["attention_mask"] = update_attention_mask(kwargs["decoder_input_ids"],generate_output)
+        kwargs["decoder_input_ids"] = torch.cat([kwargs["decoder_input_ids"], generate_output], dim=-1)
+        kwargs["input_ids"] = torch.cat([kwargs["input_ids"], generate_output], dim=-1)
+        outputs = self.model(**kwargs, output_hidden_states=True)
+        logits = (
+            outputs.logits
+            * kwargs["attention_mask"].unsqueeze(-1)
+            )
         logits = self.norm(self.activation(logits))
         lex_weights = self.pool(logits)
         return SparseRep(dense=lex_weights)
