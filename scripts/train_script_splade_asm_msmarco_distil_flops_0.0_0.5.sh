@@ -58,9 +58,11 @@ CUDA_VISIBLE_DEVICES=0,1 nohup python -m lsr.train +experiment=mlm_decoder_only_
 
 
 # multi-steps
-CUDA_VISIBLE_DEVICES=0 nohup python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_base_0.01_multi training_arguments.fp16=True wandb.resume=False > log/mlm_encoder_decoder_multi_t5_base_0.01_multi.log 2>&1 &
+CUDA_VISIBLE_DEVICES=0,1,2 nohup python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_base_0.01_multi training_arguments.fp16=True wandb.resume=False > log/mlm_encoder_decoder_multi_t5_base_0.01_multi.log 2>&1 &
 
 
 ## larger teacher 
 
-CUDA_VISIBLE_DEVICES=0,1,2  nohup python -m lsr.train +experiment=rankllama_mlm_encoder_decoder_multi_t5_base_0.0001 training_arguments.fp16=True wandb.resume=False > log/rankllama_mlm_encoder_decoder_multi_t5_base_0.0001.log 2>&1 &
+
+## larger teacher 
+CUDA_VISIBLE_DEVICES=0,1,2  nohup python -m lsr.train +experiment=rankllama_mlm_encoder_decoder_multi_t5_base_0.01 training_arguments.fp16=True wandb.resume=False > log/rankllama_mlm_encoder_decoder_multi_t5_base_0.0001.log 2>&1 &
