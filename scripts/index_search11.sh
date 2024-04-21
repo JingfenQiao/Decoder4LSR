@@ -1,27 +1,27 @@
 #!/bin/bash
-#SBATCH --job-name=search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
+#SBATCH --job-name=search_mlm_decoder_only_opt13_lora_0.001
 #SBATCH --mem=30G
-#SBATCH --time=20:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0%a.out
+#SBATCH --time=50:00:00
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_mlm_decoder_only_opt13_lora_0.001%a.out
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_mlm_decoder_only_opt13_lora_0.001%a.out
 #SBATCH --array=1
 #SBATCH --partition=cpu
 
 
 export HYDRA_FULL_ERROR=1
-MODLE_NAME=qmlm_dmlp_encoder_decoder_multi_t5_base_0.1_0.0
+MODLE_NAME=mlm_decoder_only_opt13_lora_0.001
 ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
 INPUT_DIR=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 OUTPUT_INDEX=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 
 # mkdir -p "$OUTPUT_INDEX" # Create the OUTPUT_DIR if it doesn't exist
-echo "start index "$MODLE_NAME
-$ANSERINI_PATH/target/appassembler/bin/IndexCollection \
--collection JsonSparseVectorCollection \
--input $INPUT_DIR/doc  \
--index $OUTPUT_INDEX/index \
--generator SparseVectorDocumentGenerator \
--threads 60 -impact -pretokenized -storePositions -storeDocvectors -storeRaw
+# echo "start index "$MODLE_NAME
+# $ANSERINI_PATH/target/appassembler/bin/IndexCollection \
+# -collection JsonSparseVectorCollection \
+# -input $INPUT_DIR/doc  \
+# -index $OUTPUT_INDEX/index \
+# -generator SparseVectorDocumentGenerator \
+# -threads 60 -impact -pretokenized -storePositions -storeDocvectors -storeRaw
 
 echo "start search query" $MODLE_NAME
 $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
