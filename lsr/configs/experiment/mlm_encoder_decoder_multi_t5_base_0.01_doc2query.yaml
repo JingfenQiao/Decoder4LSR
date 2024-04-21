@@ -1,10 +1,10 @@
 # @package _global_
 defaults:
-  - override /dataset@train_dataset: msmarco_triplet_distil
+  - override /dataset@train_dataset: msmarco_triplet_distil_doc2query
   - override /loss: distil_margin_mse
-  - override /model: splade_encoder_decoder_multi_multi_mlm
+  - override /model: splade_encoder_decoder_multi_mlm
 
-exp_name: mlm_encoder_decoder_multi_t5_base_0.01_multi
+exp_name: mlm_encoder_decoder_multi_t5_base_0.01_doc2query
 
 loss:
   q_regularizer: 
@@ -25,8 +25,7 @@ training_arguments:
   evaluation_strategy: 'no'
   log_level: info 
   logging_steps: 500
-  per_device_train_batch_size: 8
-  gradient_accumulation_steps: 2
+  per_device_train_batch_size: 16
   max_steps: 200000
   save_total_limit: 2 
   num_train_epochs: 30
