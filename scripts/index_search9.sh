@@ -31,4 +31,12 @@ $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
 -output $OUTPUT_INDEX/msmarco.trec \
 -hits 1000 -impact  -pretokenized  -parallelism 60
 
+ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
+
 ir_measures $ANSERINI_PATH/tools/topics-and-qrels/qrels.msmarco-passage.dev-subset.txt  $OUTPUT_INDEX/msmarco.trec MRR@10 R@1000 NDCG@10
+
+
+
+# RR@10   0.3102
+# R@1000  0.9742
+# nDCG@10 0.3717
