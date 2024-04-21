@@ -46,3 +46,12 @@ generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
 # end = time.time()
 # print(end - start)
 print(generated_text)
+
+import ir_datasets
+import tqdm
+dataset = ir_datasets.load("lsr42/msmarco-passage-doct5query")
+for doc in tqdm.tqdm(dataset.docs_iter(),desc=f"Loading doc collection from ir_datasets"):
+    doc_id = doc.doc_id
+    texts = [getattr(doc, field) for field in text_fields]
+    texts = [text for text in texts if text is not None]
+    text = " ".join(texts)

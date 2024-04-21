@@ -4,7 +4,7 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade_encoder_decoder_multi_multi_mlm
 
-exp_name: mlm_encoder_decoder_multi_multi_t5_base_0.01
+exp_name: mlm_encoder_decoder_multi_t5_base_0.01_multi
 
 loss:
   q_regularizer: 
