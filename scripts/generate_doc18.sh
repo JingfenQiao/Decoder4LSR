@@ -2,25 +2,23 @@
 #SBATCH -p gpu
 #SBATCH --job-name=mlm_encoder_decoder_multi_t5_base_0.01_doc2query
 #SBATCH --mem=30G
-#SBATCH --time=50:00:00
+#SBATCH --time=80:00:00
 #SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_encoder_decoder_multi_t5_base_0.01_doc2query%a.output
 #SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_encoder_decoder_multi_t5_base_0.01_doc2query%a.output
-#SBATCH --array=1-5   # We have 5 files
-#SBATCH --gres=gpu:nvidia_rtx_a6000
+#SBATCH --array=1   # We have 5 files
+#SBATCH --gres=gpu
 #SBATCH --exclude=ilps-cn108
-
+# nvidia_rtx_a6000
 export HYDRA_FULL_ERROR=1
-declare -a FILE_LIST=("raw_split_aa"  "raw_split_ab"  "raw_split_ac"  "raw_split_ad"  "raw_split_ae")  # replace with your actual filenames
-
-FILE_NAME="${FILE_LIST[$SLURM_ARRAY_TASK_ID - 1]}"
 
 # Updating the input path to use the selected FILE_NAME
-input_path="data/msmarco/full_collection/split/$FILE_NAME"
+input_path=hfds:lsr42/msmarco-passage-doct5query
 
 output_file_name=$FILE_NAME
 batch_size=32
 type='doc'
 python -m lsr.inference \
+inference_arguments.input_format=hfds \
 inference_arguments.input_path=$input_path \
 inference_arguments.output_file=$output_file_name.tsv \
 inference_arguments.type=$type \
