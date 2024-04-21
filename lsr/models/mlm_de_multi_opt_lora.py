@@ -83,16 +83,14 @@ class TransformerMLMSparseOPTLoraDecoderMultiSteps(SparseEncoder):
         lex_weights = self.pool(logits)
         return SparseRep(dense=lex_weights)
 
-
     def build_peft_model(self, model_name_or_dir):
         model = AutoModelForCausalLM.from_pretrained(model_name_or_dir,trust_remote_code=True)
         lora_config = LoraConfig(
-            r=64,
-            lora_alpha=64,
-            target_modules =["Wqkv", "out_proj", "fc1", "fc2"],
-            lora_dropout=0.1,
+            r=16,
+            lora_alpha=32,
+            target_modules =["down_proj", "gate_proj", "q_proj", "o_proj", "up_proj", "v_proj", "k_proj"],
+            lora_dropout=0.05,
             bias="none",
-            task_type=TaskType.CAUSAL_LM 
         )
         model = get_peft_model(model, lora_config)
         print_trainable_parameters(model)
