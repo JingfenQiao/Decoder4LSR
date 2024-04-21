@@ -1,23 +1,160 @@
-import os
-import deepspeed
-import torch
-from transformers import pipeline
+import numpy as np
+import gzip
+import json
+from argparse import ArgumentParser
+from tqdm import tqdm
+from collections import defaultdict
+import tqdm
+import gzip
+import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
+import random
 
-local_rank = int(os.getenv('LOCAL_RANK', '0'))
-world_size = int(os.getenv('WORLD_SIZE', '1'))
-generator = pipeline('text-generation', model='EleutherAI/pile-t5-base',
-                     device=local_rank)
+hard_negatives_scores = defaultdict(dict)
+bertscore = defaultdict(dict)
+rankllamascore = defaultdict(dict)
+
+with gzip.open("/var/scratch/yzhao3/lsr_eval/data/msmarco/hard_negatives_scores/cross-encoder-ms-marco-MiniLM-L-6-v2-scores.pkl.gz", "r") as f:
+    data = pickle.load(f)
+    for qid, scores in tqdm.tqdm(data.items(), desc="Processing CE scores"):
+        for did, score in scores.items():
+            hard_negatives_scores[int(qid)][int(did)] = score
+
+with gzip.open("/var/scratch/yzhao3/lsr_eval/data/msmarco/hard_negatives_scores/rankllama-ms-marco-scores.pkl.gz", "r") as f:
+    data = pickle.load(f)
+    for qid, scores in tqdm.tqdm(data.items(), desc="Processing CE scores"):
+        for did, score in scores.items():
+            rankllamascore[int(qid)][int(did)] = score
+
+# Extract all scores from rankllamascore and hard_negatives_scores
+rankllama_scores_list = [score for doc_scores in tqdm.tqdm(rankllamascore.values()) for score in doc_scores.values()]
+hard_negatives_scores_list = [score for doc_scores in tqdm.tqdm(hard_negatives_scores.values()) for score in doc_scores.values()]
+
+# Calculate mean and standard deviation for rankllamascore
+rankllama_mean = np.mean(rankllama_scores_list)
+rankllama_std = np.std(rankllama_scores_list)
+
+# Calculate mean and standard deviation for hard_negatives_scores
+hard_negatives_mean = np.mean(hard_negatives_scores_list)
+hard_negatives_std = np.std(hard_negatives_scores_list)
+
+print("rankllama mean and std", rankllama_mean, rankllama_std)
+print("head_negatives mean and std", hard_negatives_mean, hard_negatives_std)
 
 
+# Calculate a and b
+a = hard_negatives_std / rankllama_std
+b = hard_negatives_mean - a * rankllama_mean
 
-generator.model = deepspeed.init_inference(generator.model,
-                                           tensor_parallel={"tp_size": world_size},
-                                           dtype=torch.float,
-                                           replace_with_kernel_inject=True)
+# Applying affine transformation to rankllamascore
+transformed_rankllamascore = {}
+for qid, scores in tqdm.tqdm(rankllamascore.items()):
+    transformed_scores = {did: a * score + b for did, score in scores.items()}
+    transformed_rankllamascore[qid] = transformed_scores
 
-string = generator("DeepSpeed is", do_sample=True, min_length=50)
-if not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0:
-    print(string)
-# deepspeed --num_gpus 1 scripts/try2.py > log/try.log 2>&1 &
+transformed_rankllamascore_list = [score for doc_scores in tqdm.tqdm(transformed_rankllamascore.values()) for score in doc_scores.values()]
 
-# deepspeed --num_gpus 3 scripts/try2.py > log/try.log 2>&1 &
+
+min = np.min(rankllama_scores_list)
+max = np.max(rankllama_scores_list)
+
+def min_max_normalization(data, old_min, old_max, new_min=-15, new_max=15):
+    """Normalize the input data array to the range [new_min, new_max]."""
+    normalized = (data - old_min) / (old_max - old_min)
+    scaled = normalized * (new_max - new_min) + new_min
+    return scaled
+
+minmax_transformed_rankllamascore = {}
+for qid, scores in tqdm.tqdm(rankllamascore.items()):
+    transformed_scores = {did: min_max_normalization(score,old_min=min, old_max=max) for did, score in scores.items()}
+    minmax_transformed_rankllamascore[qid] = transformed_scores
+
+minmax_transformed_rankllamascore_list = [score for doc_scores in tqdm.tqdm(minmax_transformed_rankllamascore.values()) for score in doc_scores.values()]
+
+
+def affine_transform_per_query(rankllama_scores, hard_negatives_scores):
+    transformed_scores = defaultdict(dict)
+    
+    for qid in tqdm.tqdm(rankllama_scores):
+        # Extract scores for this query
+        rankllama_query_scores = np.array(list(rankllama_scores[qid].values()))
+        if qid in hard_negatives_scores:
+            hard_negatives_query_scores = np.array(list(hard_negatives_scores[qid].values()))
+            
+            # Calculate the mean and standard deviation
+            rankllama_mean = np.mean(rankllama_query_scores)
+            rankllama_std = np.std(rankllama_query_scores)
+            hard_negatives_mean = np.mean(hard_negatives_query_scores)
+            hard_negatives_std = np.std(hard_negatives_query_scores)
+            
+            # Compute transformation coefficients a and b
+            a = hard_negatives_std / rankllama_std if rankllama_std != 0 else 0
+            b = hard_negatives_mean - a * rankllama_mean
+            
+            # Apply the affine transformation
+            for did, score in rankllama_scores[qid].items():
+                transformed_scores[qid][did] = float(a * score + b)
+        else:
+            # If there are no hard negatives for this qid, copy the scores unchanged
+            print(qid, " not in hard negatives")
+            transformed_scores[qid] = float(rankllama_scores[qid])
+    
+    return transformed_scores
+
+query_transformed_rankllamascore = affine_transform_per_query(rankllamascore, hard_negatives_scores)
+query_transformed_rankllamascore_list = [score for doc_scores in tqdm.tqdm(query_transformed_rankllamascore.values()) for score in doc_scores.values()]
+
+log_rankllamascore = {}
+for qid, scores in tqdm.tqdm(rankllamascore.items()):
+    transformed_scores = {did: np.log(score + 0.001) for did, score in scores.items()}
+    log_rankllamascore[qid] = transformed_scores
+
+log_transformed_scores_list = [score for doc_scores in tqdm.tqdm(log_rankllamascore.values()) for score in doc_scores.values()]
+
+
+def z_score_normalize(data, mean, std):
+    return (data - mean) / std
+
+z_score_rankllamascore = {}
+for qid, scores in tqdm.tqdm(rankllamascore.items()):
+    transformed_scores = {did: z_score_normalize(score, rankllama_mean, rankllama_std) for did, score in scores.items()}
+    z_score_rankllamascore[qid] = transformed_scores
+
+z_score_transformed_scores_list = [score for doc_scores in tqdm.tqdm(z_score_rankllamascore.values()) for score in doc_scores.values()]
+
+
+rankllama_scores_list1 = random.sample(rankllama_scores_list, 100000)
+hard_negatives_scores_list1 = random.sample(hard_negatives_scores_list, 100000)
+transformed_scores_list1 = random.sample(transformed_rankllamascore_list, 100000)
+query_transformed_rankllamascore_list1 = random.sample(query_transformed_rankllamascore_list, 100000)
+log_transformed_rankllamascore_list1 = random.sample(log_transformed_scores_list, 100000)
+z_socre_transformed_rankllamascore_list1 = random.sample(z_score_transformed_scores_list, 100000)
+minmax_transformed_rankllamascore_list1 = random.sample(minmax_transformed_rankllamascore_list, 100000)
+
+plt.figure(figsize=(12, 8))
+sns.histplot(rankllama_scores_list1, color="blue", label="RankLlama Scores", kde=True, stat="density", bins=30)
+sns.histplot(hard_negatives_scores_list1, color="red", label="Hard Negatives Scores", kde=True, stat="density", bins=30)
+sns.histplot(query_transformed_rankllamascore_list1, color="grey", label="query Transformed RankLlama Scores", kde=True, stat="density", bins=30)
+sns.histplot(transformed_scores_list1, color="green", label="linear transformation ax+b RankLlama Scores", kde=True, stat="density", bins=30)
+# sns.histplot(z_socre_transformed_rankllamascore_list1, color="grey", label="z_score Transformed RankLlama Scores", kde=True, stat="density", bins=30)
+# sns.histplot(log_transformed_rankllamascore_list1, color="orange", label="log Transformed RankLlama Scores", kde=True, stat="density", bins=30)
+plt.title('Comparison of Score Distributions')
+plt.xlabel('Score')
+plt.ylabel('Density')
+plt.legend()
+plt.savefig('score_distribution_plot3.png')
+
+plt.figure(figsize=(12, 8))
+sns.histplot(hard_negatives_scores_list1, color="red", label="Hard Negatives Scores", fill=True)
+sns.histplot(query_transformed_rankllamascore_list1, color="grey", label="query Transformed RankLlama Scores", fill=True)
+sns.histplot(rankllama_scores_list1, color="blue", label="RankLlama Scores", fill=True)
+sns.histplot(minmax_transformed_rankllamascore_list1, color="orange", label="minmax RankLlama Scores", fill=True)
+# sns.histplot(transformed_scores_list1, color="green", label="linear transformation ax+b RankLlama Scores", fill=True)
+# sns.histplot(z_socre_transformed_rankllamascore_list1, color="grey", label="z_score Transformed RankLlama Scores", kde=True, stat="density", bins=30)
+# sns.histplot(log_transformed_rankllamascore_list1, color="orange", label="log Transformed RankLlama Scores", kde=True, stat="density", bins=30)
+plt.title('Comparison of Score Distributions')
+plt.xlabel('Score')
+plt.ylabel('Density')
+plt.legend()
+plt.savefig('score_distribution_plot2.png')
