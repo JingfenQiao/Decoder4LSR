@@ -85,23 +85,12 @@ def inference(cfg: DictConfig,):
     elif cfg.input_path.startswith(HFG_PREFIX):
         hfg_name = cfg.input_path.replace(HFG_PREFIX, "")
         dataset = load_dataset(hfg_name)
-        if cfg.type == "query":
-            for doc in tqdm(dataset["passage"], desc=f"Reading data from ir_datasets {cfg.input_path}"):
-                idx = doc["id"]
-                text = doc["text"]
-                text = prompt + text
-                ids.append(idx)
-                texts.append(text)
-        else:
-            for doc in tqdm(dataset.docs_iter(), desc=f"Reading data from ir_datasets {cfg.input_path}"):
-                idx = doc.doc_id
-                try:
-                    text = (doc.title + " " + doc.text).strip()
-                except:
-                    text = (doc.text).strip()
-                text = prompt + text
-                ids.append(idx)
-                texts.append(text)    
+        for doc in tqdm(dataset["passage"], desc=f"Reading data from ir_datasets {cfg.input_path}"):
+            idx = doc["id"]
+            text = (doc["text"]).strip()
+            text = prompt + text
+            ids.append(idx)
+            texts.append(text)    
     else:
         dataset = ir_datasets.load(cfg.input_path)
         if cfg.type == "query":

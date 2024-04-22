@@ -169,9 +169,6 @@ class TransformerMLMSparseEncoderDecoderMultiSteps(SparseEncoder):
         logits = self.norm(self.activation(logits))
         # (default: max) pooling over sequence tokens
         lex_weights = self.pool(logits)
-        torch.set_printoptions(profile="full")
-        # print(logits)
-        print(logits.shape)
         return SparseRep(dense=lex_weights)
     
 

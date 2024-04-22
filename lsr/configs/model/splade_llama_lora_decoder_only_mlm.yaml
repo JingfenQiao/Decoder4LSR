@@ -1,0 +1,10 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+    _target_: lsr.models.TransformerMLMSparseLlamaLoraDecoderMultiSteps
+    config:
+      _target_: lsr.models.TransformerMLMLlamaLoraDecoderMultiStepsConfig
+      tf_base_model_name_or_dir: McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp-supervised
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: True
+  lora: True

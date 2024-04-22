@@ -6,9 +6,9 @@
 #SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_encoder_decoder_multi_t5_base_0.01_doc2query%a.output
 #SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/mlm_encoder_decoder_multi_t5_base_0.01_doc2query%a.output
 #SBATCH --array=1   # We have 5 files
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:nvidia_rtx_a6000
 #SBATCH --exclude=ilps-cn108
-# nvidia_rtx_a6000
+
 export HYDRA_FULL_ERROR=1
 
 # Updating the input path to use the selected FILE_NAME
