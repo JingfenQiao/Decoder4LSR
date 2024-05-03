@@ -1,7 +1,7 @@
 defaults:
   - _self_ 
   - model: splade
-  - dataset@train_dataset: toy_triplets
+  - dataset@train_dataset: msmarco_triplet_distil
   - loss: distil_margin_mse
   - wandb: defaults
 query_max_length: 250
@@ -58,6 +58,7 @@ inference_arguments:
   ngram_top_k: 200
   batch_size: 256
   scale_factor: 100
+  in_text_only: False
 trainer: 
   _target_: lsr.trainer.HFTrainer
   model: ${model}

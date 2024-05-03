@@ -57,9 +57,9 @@ def inference(cfg: DictConfig,):
     ids = []
     texts = []
     if cfg.type == "query":
-        prompt = "Query: "
+        prompt = ""
     else:
-        prompt = "Passage: "
+        prompt = ""
 
     if cfg.input_format in ("tsv","json"):
         with open(cfg.input_path, "r") as f:
@@ -116,7 +116,7 @@ def inference(cfg: DictConfig,):
     all_token_ids = list(range(tokenizer.get_vocab_size()))
     all_tokens = np.array(tokenizer.convert_ids_to_tokens(all_token_ids))
 
-    for idx in tqdm(range(0, len(ids), cfg.batch_size)):
+    for idx in range(0, len(ids), cfg.batch_size):
         logger.log(msg={"batch": idx},level=1)
         batch_texts = texts[idx : idx + cfg.batch_size]
         batch_ids = ids[idx : idx + cfg.batch_size]
@@ -141,41 +141,45 @@ def inference(cfg: DictConfig,):
                 else:
                     batch_output = model.encode_docs(**batch_tkn).to("cpu")
         batch_output = batch_output.float()
-        batch_output = batch_output[:, :50265]
-
-        # Check that the tokens in the text
-        words = [i for i in word_tokenize(text.lower()) if i not in stopwords]
-        token_ids = set(tokenizer.encode(word, add_special_tokens=False) for word in words)
-        token_ids_in_text = torch.tensor(list(token_ids))
-
+        batch_output = batch_output[:, :50265]       
+        
         if cfg.in_text_only:
+            # do non-zero selection
+            batch_output = (batch_output * cfg.scale_factor).to(torch.int)
+            batch_tokens = [[] for _ in range(len(batch_ids))]
+            batch_token_ids = [[] for _ in range(len(batch_ids))]
+            batch_weights = [[] for _ in range(len(batch_ids))]
 
-            # Extract indices for token IDs in the text that are present in batch_output
-            valid_indices = [idx for idx, token_id in enumerate(all_tokens) if token_id in token_ids_in_text]
-            valid_batch_output = batch_output[:, valid_indices]
-            print("valid_batch_output", valid_batch_output)
+            for row_col in batch_output.nonzero():
+                row, col = row_col
+                batch_tokens[row].append(all_tokens[col].item())
+                batch_token_ids[row].append(all_token_ids[col])
+                batch_weights[row].append(batch_output[row, col].item())
 
-            # Convert batch output to integer values
-            batch_values = (valid_batch_output * cfg.scale_factor).to(torch.int)
-            batch_tokens = all_tokens[valid_indices]
-
-            for text_id, text, tokens, weights in zip(
-                batch_ids, batch_texts, batch_tokens, batch_values
+            for text_id, text, tokens, weights , token_ids in zip(
+                batch_ids, batch_texts, batch_tokens, batch_weights, batch_token_ids
             ):
-                mask = weights > 0
-                tokens = tokens[mask]
-                weights = weights[mask]
+                # Check that the tokens in the text
+                words = [i for i in word_tokenize(text.lower()) if i.lower() not in stopwords.words('english')]
+                token_ids_in_text = tokenizer(" ".join(words)).input_ids
+                # print("token_ids_in_text", token_ids_in_text)
+
+                token_ids_in_text_set = set(token_ids_in_text)
+                # Filter tokens and weights where token_ids are in token_ids_in_text
+                filtered_tokens = [token for token, token_id in zip(tokens, token_ids) if token_id in token_ids_in_text_set]
+                filtered_weights = [weight for token, weight, token_id in zip(tokens, weights, token_ids) if token_id in token_ids_in_text_set]
+                # print(token_ids_in_text_set)
+                # print(filtered_tokens)
+                # print(filtered_weights)
                 write_to_file(
                     file_writer,
                     {
                         "id": text_id,
                         "text": text,
-                        "vector": dict(zip(tokens.tolist(), weights.tolist())),
+                        "vector": dict(zip(filtered_tokens, filtered_weights)),
                     },
                     cfg.type,
                 )
-
-
 if __name__ == "__main__":
     start_time = time.time()
     inference()
