@@ -27,13 +27,21 @@ class Tokenizer(ABC):
 
 
 class HFTokenizer:
-    def __init__(self, tokenizer_name, is_fast=None, nearest_neighbours=None) -> None:
+    def __init__(self, tokenizer_name, is_llama=False, is_fast=None, nearest_neighbours=None) -> None:
         if is_fast != None:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 tokenizer_name, use_fast=is_fast
             )
+            if is_llama:
+                self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+                # self.tokenizer.pad_token = self.tokenizer.eos_token
+                # self.tokenizer.padding_side = "right"
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+            if is_llama:
+                self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+                # self.tokenizer.pad_token = self.tokenizer.eos_token
+                # self.tokenizer.padding_side = "right"
         if nearest_neighbours is None:
             self.nearest_neighbours = None
         else:

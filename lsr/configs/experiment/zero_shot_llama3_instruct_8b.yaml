@@ -4,12 +4,12 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade_opt3.5_decoder_only_mlm
   
-exp_name: opt_35_zero_shot
+exp_name: zero_shot_llama3_instruct_8b
 
 training_arguments:
   output_dir: ./outputs/${exp_name}
  
-
 tokenizer:
-  tokenizer_name: facebook/opt-350m
+  tokenizer_name: meta-llama/Meta-Llama-3-8B-Instruct
+  is_llama: True
 resume_from_checkpoint: False

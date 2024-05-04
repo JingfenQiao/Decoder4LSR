@@ -4,11 +4,12 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade_opt3.5_decoder_only_mlm
   
-exp_name: opt_6.7b_zero_shot
+exp_name: zero_shot_opt_6.7b
 
 training_arguments:
   output_dir: ./outputs/${exp_name}
  
 tokenizer:
   tokenizer_name: facebook/opt-6.7b
+  is_llama: False
 resume_from_checkpoint: False

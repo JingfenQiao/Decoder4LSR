@@ -9,8 +9,8 @@
 
 export HYDRA_FULL_ERROR=1
 ANSERINI_PATH=/ivi/ilps/personal/tnguyen5/jf/anserini-lsr
-# experiment=opt_6.7b_zero_shot
-experiment=llama3_instruct_8b_zero_shot
+experiment=zero_shot_opt_6.7b
+# experiment=zero_shot_llama3_instruct_8b
 
 dataset=nfcorpus
 if [[ "$dataset" == "msmarco" ]]
@@ -53,7 +53,7 @@ input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset.tsv
 batch_size=32
 type='query'
-python -m lsr.inference_zeroshot2 \
+python -m lsr.inference_zeroshot \
 inference_arguments.input_path=$input_path \
 inference_arguments.input_format=ir_datasets \
 inference_arguments.output_file=$output_file_name \
@@ -68,7 +68,7 @@ input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset/test.jsonl
 batch_size=16
 type='doc'
-python -m lsr.inference_zeroshot2 \
+python -m lsr.inference_zeroshot \
 inference_arguments.input_path=$input_path \
 inference_arguments.input_format=ir_datasets \
 inference_arguments.output_file=$output_file_name \
@@ -76,7 +76,7 @@ inference_arguments.type=$type \
 inference_arguments.batch_size=$batch_size \
 inference_arguments.scale_factor=100 \
 inference_arguments.in_text_only=True \
-inference_arguments.top_k=128 \
+inference_arguments.top_k=10 \
 +experiment=$experiment
 
 # rm -r outputs/$experiment/index/$dataset/
