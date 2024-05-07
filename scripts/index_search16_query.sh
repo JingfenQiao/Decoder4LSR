@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine
+#SBATCH --job-name=search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine_query
 #SBATCH --mem=30G
 #SBATCH --time=50:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine%a.out
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine%a.out
+#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine_query%a.out
+#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/search_rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine_query%a.out
 #SBATCH --array=1
 #SBATCH --partition=cpu
 
 export HYDRA_FULL_ERROR=1
-MODLE_NAME=rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine
+MODLE_NAME=rankllama_mlm_encoder_decoder_multi_t5_base_0.01_affine_query
 ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
 INPUT_DIR=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
 OUTPUT_INDEX=/ivi/ilps/personal/jqiao/lsr_eval/outputs/$MODLE_NAME/inference
@@ -32,12 +32,9 @@ $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
 
 ir_measures $ANSERINI_PATH/tools/topics-and-qrels/qrels.msmarco-passage.dev-subset.txt  $OUTPUT_INDEX/msmarco.trec MRR@10 R@1000 NDCG@10
 
-# checkpoint 160k
-# RR@10	0.3088
-# R@1000	0.9677
-# nDCG@10	0.3678
 
-# checkpoint 600k
-# RR@10	0.3170
-# R@1000	0.9714
-# nDCG@10	0.3766
+# querywise linear transformation
+# checkpoint 160k
+# RR@10	0.3117
+# R@1000	0.9649
+# nDCG@10	0.3716

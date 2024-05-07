@@ -43,6 +43,7 @@ class TransformerMLMSparseOPTDecoderMultiSteps(SparseEncoder):
         
         super(SparseEncoder, self).__init__(config)
         print("model name ", config.tf_base_model_name_or_dir)
+        print("conf ", config)
         self.model = AutoModelForCausalLM.from_pretrained(config.tf_base_model_name_or_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(config.tf_base_model_name_or_dir)
 
@@ -54,7 +55,10 @@ class TransformerMLMSparseOPTDecoderMultiSteps(SparseEncoder):
     def forward(self, **kwargs):
         special_tokens_mask = kwargs.pop("special_tokens_mask")
         output = self.model(**kwargs,output_hidden_states=True)
+        # sequence_lengths = kwargs['attention_mask'].sum(dim=1) - 1
+        # batch_ids = torch.arange(kwargs(kwargs['input_ids']), device=logits.device)
 
+        # logits = logits[batch_ids, sequence_lengths]
         logits = (
             output.logits
             * kwargs["attention_mask"].unsqueeze(-1)

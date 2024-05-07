@@ -24,16 +24,16 @@ def print_trainable_parameters(model):
     )
 
 
-class TransformerMLMOPTLoraDecoderMultiStepsConfig(PretrainedConfig):
+class TransformerMLMLlamaLoraDecoderMultiStepsConfig(PretrainedConfig):
     """
     Configuration for the TransformerMLMSparseEncoder
     """
 
-    model_type = "MLM_OPT_LORA_DECODER_MULTISTEPS"
+    model_type = "MLM_LLAMA_LORA_DECODER_MULTISTEPS"
 
     def __init__(
         self,
-        tf_base_model_name_or_dir: str = "facebook/opt-350m",
+        tf_base_model_name_or_dir: str = "McGill-NLP/LLM2Vec-Sheared-LLaMA-mntp-supervised",
         pool: str = "max",
         activation: str = "relu",
         norm: str = "log1p",
@@ -47,25 +47,19 @@ class TransformerMLMOPTLoraDecoderMultiStepsConfig(PretrainedConfig):
         super().__init__(**kwargs)
 
 
-class TransformerMLMSparseOPTLoraDecoderMultiSteps(SparseEncoder):
+class TransformerMLMSparseLlamaLoraDecoderMultiSteps(SparseEncoder):
     """
     TransformerSeq2SeqSparseEncoder adds a pooling (e.g., max) on top of masked language model's logits.
     """
 
-    config_class = TransformerMLMOPTLoraDecoderMultiStepsConfig
+    config_class = TransformerMLMLlamaLoraDecoderMultiStepsConfig
 
     def __init__(self, 
-                 config: TransformerMLMOPTLoraDecoderMultiStepsConfig = TransformerMLMOPTLoraDecoderMultiStepsConfig(),
+                 config: TransformerMLMLlamaLoraDecoderMultiStepsConfig = TransformerMLMLlamaLoraDecoderMultiStepsConfig(),
                  model=None):
         
         super(SparseEncoder, self).__init__(config)
-        if config.lora_pretrianed:
-            print("loading pretrained lora model", config)
-            self.model = self.load_peft_model(config._name_or_path)
-        else: 
-            print("build lora model", config)
-            self.model = self.build_peft_model(config.tf_base_model_name_or_dir)
-
+        self.model = self.load_peft_model(config._name_or_path)
         self.activation = FunctionalFactory.get(config.activation)
         self.pool = PoolingFactory.get(config.pool)
         self.norm = FunctionalFactory.get(config.norm)
@@ -99,3 +93,4 @@ class TransformerMLMSparseOPTLoraDecoderMultiSteps(SparseEncoder):
     def load_peft_model(self, model_name_or_dir):
         model = AutoPeftModelForCausalLM.from_pretrained(model_name_or_dir)
         return model
+

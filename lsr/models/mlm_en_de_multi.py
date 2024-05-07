@@ -168,8 +168,9 @@ class TransformerMLMSparseEncoderDecoderMultiSteps(SparseEncoder):
         # norm default: log(1+x)
         logits = self.norm(self.activation(logits))
         # (default: max) pooling over sequence tokens
-        lex_weights = self.pool(logits) 
+        lex_weights = self.pool(logits)
         return SparseRep(dense=lex_weights)
+    
 
     def build_model(self, model_name_or_dir):
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name_or_dir)

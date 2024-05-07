@@ -15,6 +15,8 @@ import datetime
 import logging
 import ir_datasets
 from datasets import load_dataset
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,13 @@ def write_to_file(f, result, type):
     else:
         f.write(json.dumps(result) + "\n")
 
+def get_token_ids_in_text(text, tokenizer, nltk_tokenize=False):
+    if nltk_tokenize:    
+        words = [i for i in word_tokenize(text.lower()) if i.lower() not in stopwords.words('english')]
+        token_ids_in_text = tokenizer(" ".join(words)).input_ids
+    else:        
+        token_ids_in_text = tokenizer(text.lower()).input_ids
+    return token_ids_in_text, len(token_ids_in_text)
 
 @hydra.main(version_base="1.2", config_path="configs", config_name="config")
 def inference(cfg: DictConfig,):
@@ -56,10 +65,12 @@ def inference(cfg: DictConfig,):
     ids = []
     texts = []
     if cfg.type == "query":
-        prompt = "Query: "
+        # prompt = ""
+        prompt = "<s>[INST] You are a powerful lexical search engine. You are tasked with generating important terms that can represents the semantic relevance of query in retrieval task. Make sure your word is in lowercase.\n Query: "
     else:
-        prompt = "Passage: "
-
+        # prompt = ""
+        prompt = "<s>[INST] You are a powerful lexical search engine. You are tasked with generating important terms that can represents the semantic relevance of passage in retrieval task. Make sure your word is in lowercase. \n Passage: "
+    
     if cfg.input_format in ("tsv","json"):
         with open(cfg.input_path, "r") as f:
             if cfg.input_format == "tsv":
@@ -111,8 +122,11 @@ def inference(cfg: DictConfig,):
                 ids.append(idx)
                 texts.append(text)
     assert len(ids) == len(texts)
+    # tokens in the vocabulary
     all_token_ids = list(range(tokenizer.get_vocab_size()))
     all_tokens = np.array(tokenizer.convert_ids_to_tokens(all_token_ids))
+    prompt_token_ids, prompt_len = get_token_ids_in_text(prompt, tokenizer, nltk_tokenize=True)
+
     for idx in tqdm(range(0, len(ids), cfg.batch_size)):
         logger.log(msg={"batch": idx},level=1)
         batch_texts = texts[idx : idx + cfg.batch_size]
@@ -138,47 +152,50 @@ def inference(cfg: DictConfig,):
                 else:
                     batch_output = model.encode_docs(**batch_tkn).to("cpu")
         batch_output = batch_output.float()
-        batch_output = batch_output[:, :50265]
-        if cfg.top_k > 0:
-            # do top_k selection in batch
+        batch_output = batch_output[:, :50265] # (bs, seq, vs)
+
+        all_token_ids = list(range(tokenizer.get_vocab_size()))
+        batch_indices_in_all_token_ids_in_text = []
+        for text in batch_texts:
+            # words = [i for i in word_tokenize(text.lower()) if i.lower() not in stopwords.words('english')]
+            # token_ids_in_text = tokenizer(" ".join(words)).input_ids
+            token_ids_in_text, length = get_token_ids_in_text(text, tokenizer, nltk_tokenize=True)
+            token_ids_in_text = token_ids_in_text[prompt_len:]
+
+            indices_in_all_token_ids_in_text = [all_token_ids.index(token_id) for token_id in token_ids_in_text if token_id in all_token_ids]
+            batch_indices_in_all_token_ids_in_text.append(indices_in_all_token_ids_in_text)
+
+        if cfg.in_text_only:
             top_k_res = batch_output.topk(dim=1, k=cfg.top_k, sorted=False)
-            batch_values = (top_k_res.values * cfg.scale_factor).to(torch.int)
-            indices = top_k_res.indices
-            batch_tokens = all_tokens[indices]
-            for text_id, text, tokens, weights in zip(
-                batch_ids, batch_texts, batch_tokens, batch_values
-            ):
-                mask = weights > 0
-                tokens = tokens[mask]
-                weights = weights[mask]
-                write_to_file(
-                    file_writer,
-                    {
-                        "id": text_id,
-                        "text": text,
-                        "vector": dict(zip(tokens.tolist(), weights.tolist())),
-                    },
-                    cfg.type,
-                )
-        else:
+            batch_topk_values = (top_k_res.values * cfg.scale_factor).to(torch.int)
+            topk_indices = top_k_res.indices
+            batch_topk_tokens = all_tokens[topk_indices]
+
             # do non-zero selection
             batch_output = (batch_output * cfg.scale_factor).to(torch.int)
-            batch_tokens = [[] for _ in range(len(batch_ids))]
-            batch_weights = [[] for _ in range(len(batch_ids))]
-            for row_col in batch_output.nonzero():
-                row, col = row_col
-                batch_tokens[row].append(all_tokens[col].item())
-                batch_weights[row].append(batch_output[row, col].item())
-            for text_id, text, tokens, weights in zip(
-                batch_ids, batch_texts, batch_tokens, batch_weights
+            batch_tokens = []
+            batch_token_ids = []
+            batch_weights = []
+                        
+            for indices_in_all_token_ids_in_text, output in zip(batch_indices_in_all_token_ids_in_text, batch_output.tolist()):
+                batch_tokens.append([all_tokens[indices] for indices in indices_in_all_token_ids_in_text])
+                batch_token_ids.append([all_token_ids[indices] for indices in indices_in_all_token_ids_in_text])
+                batch_weights.append([output[indices] for indices in indices_in_all_token_ids_in_text])
+
+            for text_id, text, tokens, weights , token_ids, topk_tokens, topk_values  in zip(
+                batch_ids, batch_texts, batch_tokens, batch_weights, batch_token_ids, batch_topk_tokens, batch_topk_values
             ):
+                if all(v == 0 for v in weights):
+                    result = {"id": text_id, "text": text, "tokens": topk_tokens, "weights": topk_values, "vector": dict(zip(topk_tokens, topk_values))}
+                else:
+                    result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
+                # print({"text": text, "tokens": tokens, "weights": weights})
+
                 write_to_file(
                     file_writer,
-                    {"id": text_id, "text": text, "vector": dict(zip(tokens, weights))},
+                    result,
                     cfg.type,
                 )
-
-
 if __name__ == "__main__":
     start_time = time.time()
     inference()

@@ -10,7 +10,7 @@
 #SBATCH --exclude=ilps-cn108
 
 export HYDRA_FULL_ERROR=1
-declare -a FILE_LIST=("raw_split_aa"  "raw_split_ab"  "raw_split_ac"  "raw_split_ad"  "raw_split_ae")  # replace with your actual filenames
+declare -a FILE_LIST=("raw_split_aa" "raw_split_ab"  "raw_split_ac"  "raw_split_ad"  "raw_split_ae")  # replace with your actual filenames
 
 FILE_NAME="${FILE_LIST[$SLURM_ARRAY_TASK_ID - 1]}"
 
