@@ -6,7 +6,7 @@
 #SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl%a.output
 #SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl%a.output
 #SBATCH --array=1-5%4   # We have 5 files
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:nvidia_rtx_a6000:1
 #SBATCH --exclude=ilps-cn108
 
 export HYDRA_FULL_ERROR=1
@@ -19,7 +19,7 @@ experiment=zero_shot_flan_t5_xl
 input_path="data/msmarco/full_collection/split/$FILE_NAME"
 
 output_file_name=$FILE_NAME
-batch_size=32
+batch_size=16
 type='doc'
 python -m lsr.inference_zeroshot \
 inference_arguments.input_path=$input_path \

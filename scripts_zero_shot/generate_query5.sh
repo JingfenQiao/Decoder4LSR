@@ -12,7 +12,7 @@ experiment=zero_shot_flan_t5_xxl
 
 input_path=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/data/msmarco/dev_queries/raw.tsv
 output_file_name=raw.tsv
-batch_size=64
+batch_size=32
 type='query'
 python -m lsr.inference_zeroshot \
 inference_arguments.input_path=$input_path \
