@@ -2,14 +2,14 @@
 defaults:
   - override /dataset@train_dataset: msmarco_triplet_distil
   - override /loss: distil_margin_mse
-  - override /model: splade_opt3.5_decoder_only_mlm
+  - override /model: splade_encoder_decoder_multi_mlm
   
-exp_name: opt_35_zero_shot
+exp_name: zero_shot_flan_t5_xl
 
 training_arguments:
   output_dir: ./outputs/${exp_name}
  
-
 tokenizer:
-  tokenizer_name: facebook/opt-350m
+  tokenizer_name: google/flan-t5-xl
+  is_llama: False
 resume_from_checkpoint: False

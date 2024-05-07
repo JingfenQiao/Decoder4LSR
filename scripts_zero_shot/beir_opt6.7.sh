@@ -1,19 +1,18 @@
 #!/bin/sh
 #SBATCH -p gpu
 #SBATCH --job-name=zero_shot
-#SBATCH --mem=30G
+#SBATCH --mem=40G
 #SBATCH --time=10:00:00
-#SBATCH --output=/ivi/ilps/personal/jqiao/lsr_eval/log/zero_shot.output
-#SBATCH --error=/ivi/ilps/personal/jqiao/lsr_eval/log/zero_shot.output
+#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot.output
+#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot.output
 #SBATCH --gres=gpu   # Request one GPU per task
 
-
 export HYDRA_FULL_ERROR=1
-ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
-experiment=opt_35_zero_shot
+ANSERINI_PATH=/ivi/ilps/personal/tnguyen5/jf/anserini-lsr
+experiment=zero_shot_opt_6.7b
+# experiment=zero_shot_llama3_instruct_8b
 
-dataset=trec-covid
-
+dataset=nfcorpus
 if [[ "$dataset" == "msmarco" ]]
 then
     EXTRA="/dev"
@@ -52,31 +51,33 @@ mkdir -p outputs/$experiment/inference/runs/
 
 input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset.tsv
-batch_size=256
+batch_size=32
 type='query'
-python -m lsr.inference_zeroshot2 \
-inference_arguments.input_path=$input_path \
-inference_arguments.input_format=ir_datasets \
-inference_arguments.output_file=$output_file_name \
-inference_arguments.type=$type \
-inference_arguments.batch_size=$batch_size \
-inference_arguments.scale_factor=100 \
-inference_arguments.in_text_only=True \
-+experiment=$experiment 
+# python -m lsr.inference_zeroshot \
+# inference_arguments.input_path=$input_path \
+# inference_arguments.input_format=ir_datasets \
+# inference_arguments.output_file=$output_file_name \
+# inference_arguments.type=$type \
+# inference_arguments.batch_size=$batch_size \
+# inference_arguments.scale_factor=100 \
+# inference_arguments.in_text_only=True \
+# inference_arguments.top_k=10 \
+# +experiment=$experiment 
 
 input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset/test.jsonl
-batch_size=32
+batch_size=16
 type='doc'
-python -m lsr.inference_zeroshot2 \
-inference_arguments.input_path=$input_path \
-inference_arguments.input_format=ir_datasets \
-inference_arguments.output_file=$output_file_name \
-inference_arguments.type=$type \
-inference_arguments.batch_size=$batch_size \
-inference_arguments.scale_factor=100 \
-inference_arguments.in_text_only=True \
-+experiment=$experiment
+# python -m lsr.inference_zeroshot \
+# inference_arguments.input_path=$input_path \
+# inference_arguments.input_format=ir_datasets \
+# inference_arguments.output_file=$output_file_name \
+# inference_arguments.type=$type \
+# inference_arguments.batch_size=$batch_size \
+# inference_arguments.scale_factor=100 \
+# inference_arguments.in_text_only=True \
+# inference_arguments.top_k=10 \
+# +experiment=$experiment
 
 # rm -r outputs/$experiment/index/$dataset/
 
