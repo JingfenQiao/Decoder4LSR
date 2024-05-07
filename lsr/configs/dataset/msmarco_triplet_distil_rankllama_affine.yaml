@@ -2,4 +2,4 @@ _target_: lsr.datasets.TripletIDDistilDataset
 collection_path: data/msmarco/full_collection/raw.tsv
 queries_path: data/msmarco/train_queries/queries/raw.tsv
 qrels_path:  data/msmarco/train_queries/qrels.json
-ce_score_dict: data/msmarco/hard_negatives_scores/affine-rankllama-ms-marco-scores.pkl.gz
+ce_score_dict: data/msmarco/hard_negatives_scores/rankllama-ms-marco-scores.pkl.gz

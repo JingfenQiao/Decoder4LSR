@@ -63,6 +63,7 @@ CUDA_VISIBLE_DEVICES=0,1,2 nohup python -m lsr.train +experiment=mlm_encoder_dec
 
 ## larger teacher 
 
+CUDA_VISIBLE_DEVICES=0,1,2  nohup python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_large_rankllama_teacher0.01 training_arguments.fp16=True wandb.resume=False > log/mlm_encoder_decoder_multi_t5_large_rankllama_teacher0.01.log 2>&1 &
 
 ## larger teacher 
 CUDA_VISIBLE_DEVICES=0,1,2  nohup python -m lsr.train +experiment=rankllama_mlm_encoder_decoder_multi_t5_base_0.01 training_arguments.fp16=True wandb.resume=False > log/rankllama_mlm_encoder_decoder_multi_t5_base_0.0001.log 2>&1 &

@@ -1,0 +1,11 @@
+_target_: lsr.models.DualSparseEncoder
+query_encoder:
+  _target_: lsr.models.TransformerMLMSparseEncoderDecoderMultiSteps
+  config:
+    _target_: lsr.models.TransformerMLMEncoderDecoderMultiStepsConfig
+    tf_base_model_name_or_dir: google/flan-t5-large
+
+config:
+  _target_: lsr.models.DualSparseConfig
+  shared: True
+  lora: False
