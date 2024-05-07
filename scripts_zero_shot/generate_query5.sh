@@ -1,18 +1,18 @@
 #!/bin/sh
 #SBATCH -p gpu
 #SBATCH --job-name=zs
-#SBATCH --mem=50G
-#SBATCH --time=60:00:00
-#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_opt_13b.output
-#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_opt_13b.output
+#SBATCH --mem=30G
+#SBATCH --time=50:00:00
+#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl.output
+#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl.output
 #SBATCH --gres=gpu:nvidia_rtx_a6000:1   # Request one GPU per task
 
 export variable HYDRA_FULL_ERROR=1
-experiment=zero_shot_opt_13b
+experiment=zero_shot_flan_t5_xxl
 
 input_path=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/data/msmarco/dev_queries/raw.tsv
 output_file_name=raw.tsv
-batch_size=2
+batch_size=64
 type='query'
 python -m lsr.inference_zeroshot \
 inference_arguments.input_path=$input_path \

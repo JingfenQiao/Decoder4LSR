@@ -5,7 +5,7 @@
 #SBATCH --time=10:00:00
 #SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot.output
 #SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot.output
-#SBATCH --gres=gpu:nvidia_rtx_a6000:1   # Request one GPU per task
+#SBATCH --gres=gpu   # Request one GPU per task
 
 export HYDRA_FULL_ERROR=1
 ANSERINI_PATH=/ivi/ilps/personal/tnguyen5/jf/anserini-lsr
@@ -53,31 +53,31 @@ input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset.tsv
 batch_size=32
 type='query'
-python -m lsr.inference_zeroshot \
-inference_arguments.input_path=$input_path \
-inference_arguments.input_format=ir_datasets \
-inference_arguments.output_file=$output_file_name \
-inference_arguments.type=$type \
-inference_arguments.batch_size=$batch_size \
-inference_arguments.scale_factor=100 \
-inference_arguments.in_text_only=True \
-inference_arguments.top_k=10 \
-+experiment=$experiment 
+# python -m lsr.inference_zeroshot \
+# inference_arguments.input_path=$input_path \
+# inference_arguments.input_format=ir_datasets \
+# inference_arguments.output_file=$output_file_name \
+# inference_arguments.type=$type \
+# inference_arguments.batch_size=$batch_size \
+# inference_arguments.scale_factor=100 \
+# inference_arguments.in_text_only=True \
+# inference_arguments.top_k=10 \
+# +experiment=$experiment 
 
 input_path=beir/${dataset}${EXTRA}
 output_file_name=$dataset/test.jsonl
 batch_size=16
 type='doc'
-python -m lsr.inference_zeroshot \
-inference_arguments.input_path=$input_path \
-inference_arguments.input_format=ir_datasets \
-inference_arguments.output_file=$output_file_name \
-inference_arguments.type=$type \
-inference_arguments.batch_size=$batch_size \
-inference_arguments.scale_factor=100 \
-inference_arguments.in_text_only=True \
-inference_arguments.top_k=10 \
-+experiment=$experiment
+# python -m lsr.inference_zeroshot \
+# inference_arguments.input_path=$input_path \
+# inference_arguments.input_format=ir_datasets \
+# inference_arguments.output_file=$output_file_name \
+# inference_arguments.type=$type \
+# inference_arguments.batch_size=$batch_size \
+# inference_arguments.scale_factor=100 \
+# inference_arguments.in_text_only=True \
+# inference_arguments.top_k=10 \
+# +experiment=$experiment
 
 # rm -r outputs/$experiment/index/$dataset/
 

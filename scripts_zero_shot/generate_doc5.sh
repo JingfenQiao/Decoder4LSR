@@ -3,17 +3,17 @@
 #SBATCH --job-name=zs
 #SBATCH --mem=30G
 #SBATCH --time=80:00:00
-#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xl%a.output
-#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xl%a.output
+#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl%a.output
+#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/zero_shot_flan_t5_xxl%a.output
 #SBATCH --array=1-5%4   # We have 5 files
-#SBATCH --gres=gpu:nvidia_rtx_a6000:1
+#SBATCH --gres=gpu:1
 #SBATCH --exclude=ilps-cn108
 
 export HYDRA_FULL_ERROR=1
 declare -a FILE_LIST=("raw_split_aa.tsv"  "raw_split_ab.tsv"  "raw_split_ac.tsv"  "raw_split_ad.tsv"  "raw_split_ae.tsv")  # replace with your actual filenames
 
 FILE_NAME="${FILE_LIST[$SLURM_ARRAY_TASK_ID - 1]}"
-experiment=zero_shot_flan_t5_xxl
+experiment=zero_shot_flan_t5_xl
 
 # Updating the input path to use the selected FILE_NAME
 input_path="data/msmarco/full_collection/split/$FILE_NAME"
