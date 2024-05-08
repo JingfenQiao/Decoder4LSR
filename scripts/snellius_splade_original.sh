@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -p gpu
-#SBATCH --job-name=t5_large
-#SBATCH --output=/home/span/lsr_eval/log/t5_large1.output
-#SBATCH --error=/home/span/lsr_eval/log/t5_large1.output
+#SBATCH --job-name=splade
+#SBATCH --output=/home/span/lsr_eval/log/splade.output
+#SBATCH --error=/home/span/lsr_eval/log/splade.output
 #SBATCH --time=120:00:00
-#SBATCH --gpus=4
+#SBATCH --gpus=1
 
 source activate lsr
 
@@ -21,6 +21,6 @@ nvidia-smi
 
 export HYDRA_FULL_ERROR=1
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_large_rankllama_teacher0.01 \
+CUDA_VISIBLE_DEVICES=0 nohup python -m lsr.train +experiment=rankllama_splade_msmarco_distil_flops_0.1_0.08 \
     training_arguments.fp16=True \
     wandb.resume=False
