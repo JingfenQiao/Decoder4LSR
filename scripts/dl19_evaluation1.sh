@@ -3,8 +3,8 @@
 #SBATCH --job-name=splade_affine_dl19
 #SBATCH --mem=30G
 #SBATCH --time=10:00:00
-#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/splade_affine_dl19.output
-#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/splade_affine_dl19.output
+#SBATCH --output=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/splade_affine_querywise_dl19.output
+#SBATCH --error=/ivi/ilps/personal/tnguyen5/jf/lsr_eval/log/splade_affine_querywise_dl19.output
 #SBATCH --gres=gpu   # Request one GPU per task
 
 export variable HYDRA_FULL_ERROR=1

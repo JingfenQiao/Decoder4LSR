@@ -5,7 +5,7 @@
 #SBATCH --error=/home/jqiao/project/lsr_eval/log/t5_large.output
 #SBATCH --time=120:00:00
 #SBATCH --ntasks=1
-#SBATCH --gpus=1
+#SBATCH --gpus=4
 
 
 source activate lsr
@@ -23,6 +23,6 @@ nvidia-smi
 
 export HYDRA_FULL_ERROR=1
 
-CUDA_VISIBLE_DEVICES=0 nohup python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_large_rankllama_teacher0.01 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m lsr.train +experiment=mlm_encoder_decoder_multi_t5_large_rankllama_teacher0.01 \
     training_arguments.fp16=True \
     wandb.resume=False

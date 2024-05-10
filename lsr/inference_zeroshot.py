@@ -185,10 +185,13 @@ def inference(cfg: DictConfig,):
             for text_id, text, tokens, weights , token_ids, topk_tokens, topk_values  in zip(
                 batch_ids, batch_texts, batch_tokens, batch_weights, batch_token_ids, batch_topk_tokens, batch_topk_values
             ):
+                
                 if all(v == 0 for v in weights):
                     result = {"id": text_id, "text": text, "tokens": topk_tokens, "weights": topk_values, "vector": dict(zip(topk_tokens, topk_values))}
                 else:
                     result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
+                # result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
+
                 # print({"text": text, "tokens": tokens, "weights": weights})
 
                 write_to_file(

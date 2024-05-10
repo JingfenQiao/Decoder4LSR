@@ -4,7 +4,7 @@ defaults:
   - override /loss: distil_margin_mse
   - override /model: splade
 
-exp_name: splade_affine
+exp_name: splade_affine_query
 
 loss:
   q_regularizer: 
