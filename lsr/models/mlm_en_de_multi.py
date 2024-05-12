@@ -157,13 +157,11 @@ class TransformerMLMSparseEncoderDecoderMultiSteps(SparseEncoder):
             kwargs["decoder_input_ids"] = kwargs["decoder_input_ids"].to(decoder_input_ids.device)
 
         output = self.model(**kwargs, output_hidden_states=True)
-        decoder_last_hidden_state = output.decoder_hidden_states[-1]
-        term_scores = self.term_importance(decoder_last_hidden_state)
+
         shifted_attention_mask = self.model._shift_right(kwargs["attention_mask"])
         logits = (
             output.logits
             * shifted_attention_mask.unsqueeze(-1)
-            * term_scores
         )
         # norm default: log(1+x)
         logits = self.norm(self.activation(logits))

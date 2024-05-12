@@ -141,7 +141,7 @@ class DualSparseEncoder(PreTrainedModel):
         """Save both query and document encoder"""
         self.config.save_pretrained(model_dir)
         if self.config.shared:
-            self.encoder.save_pretrained(model_dir + "/shared_encoder",safe_serialization=False)
+            self.encoder.save_pretrained(model_dir + "/shared_encoder")
             if self.config.lora:
                 self.encoder.model.save_pretrained(model_dir + "/shared_encoder",save_embedding_layers=True)
         else:
