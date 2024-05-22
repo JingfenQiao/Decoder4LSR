@@ -23,9 +23,10 @@ HFG_PREFIX = "hfds:"
 
 def write_to_file(f, result, type):
     if type == "query":
-        rep_text = " ".join(Counter(result["vector"]).elements()).strip()
-        if len(rep_text) > 0:
-            f.write(f"{result['id']}\t{rep_text}\n")
+        f.write(json.dumps(result) + "\n")
+        # rep_text = " ".join(Counter(result["vector"]).elements()).strip()
+        # if len(rep_text) > 0:
+        #     f.write(f"{result['id']}\t{rep_text}\n")
     else:
         f.write(json.dumps(result) + "\n")
 
@@ -56,12 +57,12 @@ def inference(cfg: DictConfig,):
     ids = []
     texts = []
     if cfg.type == "query":
-        prompt = "Query "
-        # prompt = ""
+        prompt = "Query: "
+        prompt = ""
 
     else:
-        prompt = "Passage "
-        # prompt = ""
+        prompt = "Passage: "
+        prompt = ""
 
     if cfg.input_format in ("tsv","json"):
         with open(cfg.input_path, "r") as f:
