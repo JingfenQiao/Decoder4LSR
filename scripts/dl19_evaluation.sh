@@ -38,3 +38,6 @@ $ANSERINI_PATH/target/appassembler/bin/SearchCollection \
 
 ir_measures $ANSERINI_PATH/tools/topics-and-qrels/qrels.dl19-passage.txt $output_path/results/$output_file_name.result MRR@10 NDCG@10
 
+
+ANSERINI_PATH=/ivi/ilps/personal/jqiao/anserini-lsr
+

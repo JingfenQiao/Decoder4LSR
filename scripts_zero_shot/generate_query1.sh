@@ -21,5 +21,5 @@ inference_arguments.type=$type \
 inference_arguments.batch_size=$batch_size \
 inference_arguments.scale_factor=100 \
 inference_arguments.in_text_only=True \
-inference_arguments.top_k=10 \
+inference_arguments.top_k=10000 \
 +experiment=$experiment 

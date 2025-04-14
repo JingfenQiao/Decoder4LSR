@@ -1,0 +1,29 @@
+# @package _global_
+defaults:
+  - override /dataset@train_dataset: msmarco_triplet_distil
+  - override /loss: distil_margin_mse
+  - override /model: splade
+
+exp_name: zero_shot_bert_base
+
+loss:
+  q_regularizer: 
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.001
+    T: 50000
+  d_regularizer:
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.001
+    T: 50000
+
+training_arguments:
+  _target_: transformers.TrainingArguments
+  output_dir: ./outputs/${exp_name}
+  run_name: ${exp_name}$
+  per_device_train_batch_size: 16
+  learning_rate: 1e-6
+  max_grad_norm: 0.3
+
+tokenizer:
+  tokenizer_name: distilbert/distilbert-base-uncased
+resume_from_checkpoint: False

@@ -28,6 +28,10 @@ def write_to_file(f, result, type):
         rep_text = " ".join(Counter(result["vector"]).elements()).strip()
         if len(rep_text) > 0:
             f.write(f"{result['id']}\t{rep_text}\n")
+    if type == "not_query":
+        rep_text = " ".join(result["vector"].keys()).strip()
+        if len(rep_text) > 0:
+            f.write(f"{result['id']}\t{rep_text}\n")
     else:
         f.write(json.dumps(result) + "\n")
 
@@ -152,7 +156,7 @@ def inference(cfg: DictConfig,):
                 else:
                     batch_output = model.encode_docs(**batch_tkn).to("cpu")
         batch_output = batch_output.float()
-        batch_output = batch_output[:, :50265] # (bs, seq, vs)
+        # batch_output = batch_output[:, :50265] # (bs, seq, vs)
 
         all_token_ids = list(range(tokenizer.get_vocab_size()))
         batch_indices_in_all_token_ids_in_text = []
@@ -190,8 +194,7 @@ def inference(cfg: DictConfig,):
                     result = {"id": text_id, "text": text, "tokens": topk_tokens, "weights": topk_values, "vector": dict(zip(topk_tokens, topk_values))}
                 else:
                     result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
-                # result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
-
+                  # result = {"id": text_id, "text": text, "tokens": tokens, "weights": weights, "vector": dict(zip(tokens, weights))}
                 # print({"text": text, "tokens": tokens, "weights": weights})
 
                 write_to_file(

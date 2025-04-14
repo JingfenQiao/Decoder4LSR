@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - override /dataset@train_dataset: msmarco_triplet_distil
+  - override /loss: distil_margin_mse
+  - override /model: splade_encoder_decoder_multi_mlm
+  
+exp_name: zero_shot_flan_t5_base
+
+training_arguments:
+  output_dir: ./outputs/${exp_name}
+ 
+tokenizer:
+  tokenizer_name: google/flan-t5-base
+  is_llama: False
+resume_from_checkpoint: False

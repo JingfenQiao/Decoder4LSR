@@ -63,7 +63,7 @@ def inference(cfg: DictConfig,):
         prompt = "Passage "
         # prompt = ""
 
-    if cfg.input_format in ("tsv","json"):
+    if cfg.input_format in ("tsv","jsonl"):
         with open(cfg.input_path, "r") as f:
             if cfg.input_format == "tsv":
                 for line in tqdm(f, desc=f"Reading data from {cfg.input_path}"):
@@ -74,10 +74,10 @@ def inference(cfg: DictConfig,):
                         texts.append(text)
                     except:
                         pass
-            elif cfg.input_format == "json":
+            elif cfg.input_format == "jsonl":
                 for line in tqdm(f, desc=f"Reading data from {cfg.input_path}"):
                     line = json.loads(line.strip())
-                    idx = line["_id"]
+                    idx = line["id"]
                     if "title" in line:
                         text = (line["title"] + " " + line["text"]).strip()
                     else:
@@ -142,7 +142,7 @@ def inference(cfg: DictConfig,):
                     batch_output = model.encode_docs(**batch_tkn).to("cpu")
         batch_output = batch_output.float()
         batch_output = batch_output[:, :50265]
-        # batch_output = batch_output[:, :32100]
+        batch_output = batch_output[:, :32100]
 
         if cfg.top_k > 0:
             # do top_k selection in batch
