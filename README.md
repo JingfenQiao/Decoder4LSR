@@ -70,4 +70,4 @@ Results of RQ3 in Table 3 are the outputs of the experiments run using scripts i
 
 - RQ4: How is the performance of the LSR affected by scaling the teacher and student models on the different backbones?
 
-Results of RQ3 in Table 3 are the outputs of the experiments run using scripts in bash_rq3.
+Results of RQ4 in Table 4 are the outputs of the experiments run using scripts in bash_rq4.
