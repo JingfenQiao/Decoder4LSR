@@ -8,7 +8,7 @@ This repository contains the code used to reproduce the training of the paper in
 
 Learned Sparse Retrieval (LSR) has traditionally focused on small-scale encoder-only transformer architectures. With the advent of large-scale pre-trained language models, their capability to generate sparse representations for retrieval tasks across different transformer-based architectures, including encoder-only, decoder-only, and encoder-decoder models, remains largely unexplored. This repository investigates the effectiveness of LSR across these architectures, exploring various sparse representation heads and model scales.
 
-Our code ultilize the [*Unified LSR Framework*](https://github.com/thongnt99/learned-sparse-retrieval) code,  the structure of the `lsr` package is as following: 
+Our code ultilize the [*Unified LSR Framework*](https://github.com/thongnt99/learned-sparse-retrieval),  the structure of the `lsr` package is as following: 
 
 ```.
 ├── configs  #configuration of different components
