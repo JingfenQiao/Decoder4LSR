@@ -132,3 +132,4 @@ outputs/
 wandb/
 anserini-outputs/
 log/
+not_github/

@@ -1,7 +1,14 @@
 
 # Leveraging Decoder Architectures for Learned Sparse Retrieval
 
-The structure of the `lsr` package is as following: 
+This repository contains the code used to reproduce the training of the paper in [*Leveraging Decoder Architectures for Learned Sparse Retrieval*]() paper. 
+
+
+# Introduction
+
+Learned Sparse Retrieval (LSR) has traditionally focused on small-scale encoder-only transformer architectures. With the advent of large-scale pre-trained language models, their capability to generate sparse representations for retrieval tasks across different transformer-based architectures, including encoder-only, decoder-only, and encoder-decoder models, remains largely unexplored. This repository investigates the effectiveness of LSR across these architectures, exploring various sparse representation heads and model scales.
+
+Our code ultilize the [*Unified LSR Framework*](https://github.com/thongnt99/learned-sparse-retrieval) code,  the structure of the `lsr` package is as following: 
 
 ```.
 ├── configs  #configuration of different components
@@ -18,11 +25,7 @@ The structure of the `lsr` package is as following:
 └── utils   #common utilities used in different places
 ```
 
-* The list of all configurations used in the paper could be found [here](#list-of-configurations-used-in-the-paper)
-
-* The instruction for running experiments could be found [here](#training-and-inference-instructions)
-
-## Training and inference instructions 
+## Setup
 
 ### 1. Create conda environment and install dependencies: 
 
@@ -36,16 +39,25 @@ Install dependencies with `pip`
 pip install -r requirements.txt
 ```
 
-### 2. Downwload/Prepare datasets
- We have included all pre-defined dataset configurations under `lsr/configs/dataset`. Before starting training, ensure that you have the `ir_datasets` and (huggingface) `datasets` libraries installed, as the framework will automatically download and store the necessary data to the correct directories.
+## Dataset and Models
 
-For datasets from `ir_datasets`, the downloaded files are saved by default at `~/.ir_datasets/`. You can modify this path by changing the `IR_DATASETS_HOME` environment variable.
 
-Similarly, for datasets from the HuggingFace's `datasets`, the downloaded files are stored at `~/.cache/huggingface/datasets` by default. To specify a different cache directory, set the `HF_DATASETS_CACHE` environment variable. 
+## List of configurations used in the paper
 
-To train a customed model on your own dataset, please use the sample configurations under `lsr/config/dataset` as templates. Overall, you need three important files (see `lsr/dataset_utils` for the file format): 
-- document collection: maps `document_id` to `document_text` 
-- queries: maps `query_id` to `query_text`
-- train triplets or scored pairs:
-    - train triplets, used for contrastive learning, contains a list of <`query_id`, `positive_document_id`, `negative_document_id`> triplets.
-    - scored_pairs, used for distillation training, contain pairs of <`query`, `document_id`> with a relevance score.  
+- RQ1: Can LLMs effectively generate sparse representations in a zero-shot setting when prompted?
+
+Results of RQ1 in Table 1 are the outputs of the experiments run using scripts in bash_rq1.
+
+- RQ2: Can encoder-decoder or decoder-only backbones outperform encoder-only backbones when using multi-tokens decoding approach?
+
+
+Results of RQ2 in Table 2 are the outputs of the experiments run using scripts in bash_rq2.
+
+- RQ3: Which sparse representation head is better for creating a sparse representation?
+
+Results of RQ3 in Table 3 are the outputs of the experiments run using scripts in bash_rq3.
+
+
+- RQ4: How is the performance of the LSR affected by scaling the teacher and student models on the different backbones?
+
+Results of RQ3 in Table 3 are the outputs of the experiments run using scripts in bash_rq3.

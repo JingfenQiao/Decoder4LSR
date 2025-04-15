@@ -1,0 +1,45 @@
+# @package _global_
+defaults:
+  - override /dataset@train_dataset: msmarco_triplet_distil
+  - override /loss: distil_margin_mse
+  - override /model: splade_encoder_decoder_multi_mlm_flan_t5_large
+
+exp_name: mlm_encoder_decoder_multi_t5_large
+
+loss:
+  q_regularizer: 
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.01
+    T: 50000
+  d_regularizer:
+    _target_: lsr.losses.regularizer.FLOPs
+    weight: 0.01
+    T: 50000
+ 
+training_arguments:
+  _target_: transformers.TrainingArguments
+  output_dir: ./outputs/${exp_name}
+  overwrite_output_dir: True 
+  remove_unused_columns: False 
+  do_train: True
+  evaluation_strategy: 'no'
+  log_level: info 
+  logging_steps: 500
+  per_device_train_batch_size: 4
+  max_steps: 200000
+  save_total_limit: 2 
+  num_train_epochs: 30
+  save_strategy: "steps" 
+  save_steps: 20000
+  warmup_steps: 6000
+  fp16: True
+  report_to: wandb 
+  dataloader_num_workers: 16
+  dataloader_drop_last: True
+  run_name: ${exp_name}$
+  ignore_data_skip: False
+  ddp_find_unused_parameters: False
+  seed: 42
+tokenizer:
+  tokenizer_name: google/flan-t5-large
+resume_from_checkpoint: False
