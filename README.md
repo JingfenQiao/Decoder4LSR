@@ -40,7 +40,17 @@ pip install -r requirements.txt
 ```
 
 ## Dataset and Models
+Download Ms Marco training data from [*here*](https://download.europe.naverlabs.com/splade/sigir22/data.tar.gz). After downloading, you can just untar in the root directory, and it will be placed in the right folder.
 
+```
+tar -xzvf file.tar.gz
+
+mkdir -p data/msmarco/full_collection/split
+
+# Split the file into 5 parts and save in the split folder
+split -n 5 -a 2 raw.tsv splits/raw_split_ 
+
+```
 
 ## List of configurations used in the paper
 
