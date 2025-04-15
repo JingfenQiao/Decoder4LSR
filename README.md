@@ -52,6 +52,11 @@ split -n 5 -a 2 raw.tsv splits/raw_split_
 
 ```
 
+# Index and Search
+
+You can download the [*Anserini*](https://github.com/thongnt99/anserini-lsr) for index and search, then follow the instructions in the README for installation. If the tests fail, you can skip it by adding -Dmaven.test.skip=true. When the installation is done, you can continue with the next steps.
+
+
 ## List of configurations used in the paper
 
 - RQ1: Can LLMs effectively generate sparse representations in a zero-shot setting when prompted?
